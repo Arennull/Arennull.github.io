@@ -6,7 +6,7 @@ export interface SpriteData {
   colors: Record<string, string>;
 }
 
-/** A small samurai: horned helmet, red armour and a katana at his side. */
+/** A small samurai in the colours of my avatar: green armour, bone-coloured crest and mask. */
 export const HERO: SpriteData = {
   rows: [
     '.y........y.',
@@ -25,13 +25,13 @@ export const HERO: SpriteData = {
     '..ooo..ooo..',
   ],
   colors: {
-    y: '#ffcd75',
-    r: '#b13e53',
-    s: '#ffcd75',
+    y: '#dcc8a0',
+    r: '#2e6b5e',
+    s: '#dcc8a0',
     e: '#1a1c2c',
     w: '#f4f4f4',
-    b: '#3b5dc9',
-    o: '#ef7d57',
+    b: '#1f4a44',
+    o: '#b8a47c',
   },
 };
 
