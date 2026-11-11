@@ -680,21 +680,38 @@ button:disabled {
   border-color: var(--yellow);
 }
 
-.trial-number {
-  display: grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  flex: none;
-  background: var(--yellow);
-  color: var(--night);
-  font-size: 1.4rem;
-  font-weight: 700;
-}
-
 .trial-meta {
+  display: grid;
+  justify-items: end;
+  gap: 2px;
   margin-left: auto;
   text-align: right;
+}
+
+.trial-meta .tick {
+  margin: 0;
+  padding: 0;
+}
+
+.trial-card .sprite {
+  flex: none;
+}
+
+.trial-card.boss {
+  border-color: var(--red);
+}
+
+.trial-card:disabled {
+  opacity: 0.75;
+}
+
+.trial-card:disabled:hover {
+  border-color: var(--red);
+}
+
+.sprite.locked {
+  filter: brightness(0);
+  opacity: 0.6;
 }
 
 .pips {
@@ -1153,6 +1170,243 @@ details p {
   color: var(--white);
 }
 
+/* ───────── Title screen ───────── */
+.screen.on-title .world {
+  grid-column: 1 / -1;
+  grid-row: 1 / -1;
+}
+
+.title {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 6px;
+  padding: 16px;
+  text-align: center;
+  background: rgba(26, 28, 44, 0.72);
+}
+
+.title .avatar {
+  animation: bob 1s steps(2) infinite;
+}
+
+.title h1 {
+  margin-top: 10px;
+  font-size: clamp(2.2rem, 8vw, 4.6rem);
+  line-height: 1;
+  color: var(--yellow);
+  text-shadow:
+    4px 4px 0 var(--red),
+    8px 8px 0 #000;
+}
+
+.title-role {
+  margin-top: 8px;
+  font-size: 1.4rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--cyan);
+}
+
+.title-tag {
+  color: var(--silver);
+}
+
+.title-menu {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+  margin-top: 22px;
+  font-size: 1.35rem;
+}
+
+.title-menu button {
+  padding: 2px 10px 2px 0;
+}
+
+.title-menu button:hover,
+.title-menu button:focus-visible {
+  color: var(--yellow);
+  outline: none;
+}
+
+.title-menu button:hover .cursor,
+.title-menu button:focus-visible .cursor {
+  visibility: visible;
+}
+
+.title-hint {
+  margin-top: 16px;
+  color: var(--slate);
+}
+
+@keyframes bob {
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+/* ───────── Hero on the map ───────── */
+.hero-marker {
+  pointer-events: none;
+}
+
+.hero-marker .avatar {
+  display: block;
+  filter: drop-shadow(2px 2px 0 #000);
+  animation: bob 0.6s steps(2) infinite;
+}
+
+.btn.sound {
+  color: var(--slate);
+}
+
+.btn.sound.on {
+  background: var(--lime);
+  color: var(--night);
+}
+
+/* ───────── Battles ───────── */
+.battle-field {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.battle-field:disabled .game {
+  opacity: 0.7;
+}
+
+.arena {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 14px 10px 10px;
+  background: linear-gradient(var(--navy) 0 58%, var(--ink) 58%);
+  border: var(--px) solid var(--slate);
+}
+
+.fighter {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.fighter > span:first-child {
+  display: block;
+  animation: bob 1s steps(2) infinite;
+}
+
+.fighter.enemy > span:first-child {
+  animation-delay: 0.5s;
+}
+
+.fighter > .hurt:first-child {
+  animation: hurt 0.45s steps(6);
+}
+
+@keyframes hurt {
+  0%,
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  20%,
+  60% {
+    transform: translateX(-6px);
+    opacity: 0.3;
+  }
+  40%,
+  80% {
+    transform: translateX(6px);
+    opacity: 1;
+  }
+}
+
+.arena.won .enemy .sprite,
+.arena.lost .hero .sprite {
+  opacity: 0.2;
+}
+
+.vs {
+  align-self: center;
+  color: var(--yellow);
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.hp {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.hp i {
+  width: 12px;
+  height: 10px;
+  background: var(--night);
+  border: 2px solid var(--white);
+}
+
+.hp i.on {
+  background: var(--red);
+}
+
+.hero .hp i.on {
+  background: var(--lime);
+}
+
+.battle-log {
+  min-height: 1.9em;
+  margin: 8px 0;
+  padding: 3px 10px;
+  background: var(--night);
+  border: 2px solid var(--slate);
+  color: var(--yellow);
+}
+
+.outcome {
+  display: grid;
+  gap: 4px;
+  margin: 8px 0 12px;
+  padding: 12px 14px;
+  border: var(--px) solid var(--lime);
+}
+
+.outcome strong {
+  font-size: 1.5rem;
+  color: var(--lime);
+}
+
+.outcome.lost {
+  border-color: var(--red);
+}
+
+.outcome.lost strong {
+  color: var(--red);
+}
+
+.outcome .row {
+  margin-top: 8px;
+}
+
+.trophies li {
+  color: var(--slate);
+  border-style: dashed;
+}
+
+.trophies li.won {
+  color: var(--yellow);
+  border-style: solid;
+  border-color: var(--yellow);
+}
+
 /* ───────── Small screens: a scrolling page with a bottom menu ───────── */
 @media (max-width: 900px) {
   html,
@@ -1234,7 +1488,8 @@ details p {
     text-align: center;
   }
 
-  .menu .cursor {
+  .menu .cursor,
+  .keys-hint {
     display: none;
   }
 

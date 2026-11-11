@@ -2,17 +2,24 @@ import { useCallback, useMemo, useState } from 'react';
 import { BrainStage } from './brain/BrainStage';
 import { useI18n } from './i18n';
 import { CLUSTER_COLORS, PALETTE, type Tab } from './i18n/strings';
-import { neighbours, neurons } from './lib/brain';
+import { neighbours, neuronById, neurons } from './lib/brain';
 import type { Cluster } from './lib/types';
 import { Dialogue, Hud, MapInfo, Menu, Toasts, type Line } from './ui/Hud';
 import { NO_FOCUS, Oracle, type BrainFocus, type OracleLine } from './ui/Oracle';
 import { CvDialog, HeroSheet, Quests, Trials } from './ui/Panels';
 import { useGame } from './ui/progress';
+import { play } from './ui/sfx';
+import { Title } from './ui/Title';
+
+/** Where the hero stands when the game begins. */
+const HOME = neuronById('about-me').index;
 
 export default function App() {
   const { t, lang } = useI18n();
   const { progress, gain } = useGame();
+  const [started, setStarted] = useState(false);
   const [tab, setTab] = useState<Tab>('map');
+  const [hero, setHero] = useState(HOME);
   const [selected, setSelected] = useState<number | null>(null);
   const [focus, setFocus] = useState<BrainFocus>(NO_FOCUS);
   const [oracle, setOracle] = useState<OracleLine | null>(null);
@@ -27,7 +34,10 @@ export default function App() {
   const select = useCallback(
     (index: number | null) => {
       setSelected(index);
-      if (index !== null) gain({ type: 'discover', ids: [neurons[index]!.node.id] });
+      if (index === null) return;
+      setHero(index);
+      play('move');
+      gain({ type: 'discover', ids: [neurons[index]!.node.id] });
     },
     [gain],
   );
@@ -98,32 +108,44 @@ export default function App() {
   }
 
   return (
-    <div className={`screen tab-${tab}`}>
-      <Hud onSkip={() => setCv(true)} />
-      <aside className="side">
-        <Menu tab={tab} onTab={openTab} />
-        <MapInfo region={querying ? null : region} onRegion={setRegion} />
-      </aside>
+    <div className={`screen tab-${tab} ${started ? '' : 'on-title'}`}>
+      {started && (
+        <>
+          <Hud onSkip={() => setCv(true)} />
+          <aside className="side">
+            <Menu tab={tab} onTab={openTab} />
+            <MapInfo region={querying ? null : region} onRegion={setRegion} />
+          </aside>
+        </>
+      )}
       <main className="world">
         <BrainStage
           lit={querying ? focus.lit : regionLit}
           sources={focus.sources}
           query={focus.query}
           selected={selected}
+          hero={hero}
+          keys={started && tab === 'map' && !cv}
           discovered={discovered}
           onSelect={select}
         />
-        {tab !== 'map' && (
+        {started && tab !== 'map' && (
           <div className="panel win">
             {tab === 'oracle' && <Oracle onFocus={setFocus} onLine={setOracle} />}
-            {tab === 'trials' && <Trials />}
+            {tab === 'trials' && <Trials onHero={() => openTab('hero')} />}
             {tab === 'quests' && <Quests onLocate={locate} />}
             {tab === 'hero' && <HeroSheet />}
           </div>
         )}
       </main>
-      <Dialogue line={line} />
-      <Toasts />
+      {started ? (
+        <>
+          <Dialogue line={line} />
+          <Toasts />
+        </>
+      ) : (
+        <Title onStart={() => setStarted(true)} onSkip={() => setCv(true)} />
+      )}
       <CvDialog open={cv} onClose={() => setCv(false)} />
     </div>
   );

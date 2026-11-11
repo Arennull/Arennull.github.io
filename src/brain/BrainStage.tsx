@@ -1,4 +1,4 @@
-import { Component, lazy, Suspense, useMemo, useRef, type ReactNode } from 'react';
+import { Component, lazy, Suspense, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useInView, useLowPower, useReducedMotion } from '../hooks';
 import { useI18n } from '../i18n';
 import { CLUSTER_COLORS, PALETTE } from '../i18n/strings';
@@ -17,10 +17,19 @@ function hasWebGL(): boolean {
   }
 }
 
-class SceneBoundary extends Component<{ fallback: ReactNode; children: ReactNode }> {
+interface BoundaryProps {
+  fallback: ReactNode;
+  onFail: () => void;
+  children: ReactNode;
+}
+
+class SceneBoundary extends Component<BoundaryProps> {
   state = { failed: false };
   static getDerivedStateFromError() {
     return { failed: true };
+  }
+  componentDidCatch() {
+    this.props.onFail();
   }
   render() {
     return this.state.failed ? this.props.fallback : this.props.children;
@@ -31,6 +40,10 @@ export interface StageProps {
   lit: number[];
   sources: number[];
   selected: number | null;
+  /** Neuron the hero is standing on. */
+  hero: number;
+  /** Whether the arrow keys move the hero. */
+  keys: boolean;
   discovered: ReadonlySet<number>;
   query: BrainQuery | null;
   onSelect: (index: number | null) => void;
@@ -83,12 +96,13 @@ export function BrainStage(props: StageProps) {
   const reducedMotion = useReducedMotion();
   const lowPower = useLowPower();
   const webgl = useMemo(hasWebGL, []);
+  const [failed, setFailed] = useState(false);
   const flat = <Brain2D {...props} />;
 
   return (
     <div className="brain-stage" ref={ref}>
       {webgl ? (
-        <SceneBoundary fallback={flat}>
+        <SceneBoundary fallback={flat} onFail={() => setFailed(true)}>
           <Suspense fallback={<div className="brain-loading" aria-hidden />}>
             <BrainScene
               {...props}
@@ -103,7 +117,10 @@ export function BrainStage(props: StageProps) {
       ) : (
         flat
       )}
-      <p className="brain-hint">{t.map.drag}</p>
+      <p className="brain-hint">
+        {webgl && !failed && <span className="keys-hint">{t.map.keys}</span>}
+        {t.map.drag}
+      </p>
     </div>
   );
 }

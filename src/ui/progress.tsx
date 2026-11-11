@@ -18,6 +18,7 @@ import {
   type Progress,
   type ProgressEvent,
 } from '../lib/progress';
+import { play } from './sfx';
 
 const STORAGE_KEY = 'progress';
 const TOAST_MS = 1800;
@@ -78,7 +79,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
     if (xp <= before) return;
     const fresh: Toast[] = [{ id: nextToast.current++, text: t.toast.xp(xp - before), big: false }];
     const level = levelOf(xp).level;
-    if (level > levelOf(before).level) {
+    const levelled = level > levelOf(before).level;
+    play(levelled ? 'level' : 'xp');
+    if (levelled) {
       fresh.push({
         id: nextToast.current++,
         text: t.toast.levelUp(t.ranks[level - 1] ?? ''),

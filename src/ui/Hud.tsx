@@ -4,12 +4,14 @@ import { useI18n } from '../i18n';
 import { CLUSTER_COLORS, CONTACT, type Tab } from '../i18n/strings';
 import { EXPLORE_GOAL, levelOf, objectivesOf } from '../lib/progress';
 import { CLUSTERS, type Cluster } from '../lib/types';
-import { Avatar } from './Panels';
 import { useGame } from './progress';
+import { useSound } from './sfx';
+import { Avatar } from './sprites';
 
 export function Hud({ onSkip }: { onSkip: () => void }) {
   const { t, lang, setLang } = useI18n();
   const { xp } = useGame();
+  const [sound, setSound] = useSound();
   const { level, fraction, next } = levelOf(xp);
 
   return (
@@ -43,6 +45,15 @@ export function Hud({ onSkip }: { onSkip: () => void }) {
       <div className="hud-actions">
         <button type="button" className="btn small" onClick={onSkip}>
           {t.skip} ▸
+        </button>
+        <button
+          type="button"
+          className={`btn small sound ${sound ? 'on' : ''}`}
+          aria-pressed={sound}
+          aria-label={t.title.sound}
+          onClick={() => setSound(!sound)}
+        >
+          ♪
         </button>
         <div className="lang" role="group" aria-label="Language">
           {(['en', 'es'] as const).map((code) => (
@@ -99,8 +110,9 @@ export function MapInfo({
   const goals: [boolean, string][] = [
     [done.explore, t.objectives.explore(progress.discovered.length, EXPLORE_GOAL)],
     [done.ask, t.objectives.ask],
-    [done.trial, t.objectives.trial],
+    [done.battle, t.objectives.battle],
     [done.quest, t.objectives.quest],
+    [done.boss, t.objectives.boss],
     [done.recruit, t.objectives.recruit],
   ];
 

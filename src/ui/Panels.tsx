@@ -1,107 +1,87 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { projects } from '../../content/projects';
+import { BossFight } from '../games/BossFight';
 import { ChunkingLab } from '../games/ChunkingLab';
 import { CloserFarther } from '../games/CloserFarther';
 import { RetrieverGame } from '../games/RetrieverGame';
 import { useI18n } from '../i18n';
 import { CLUSTER_COLORS, CONTACT, STACK } from '../i18n/strings';
 import { neuronById, neurons } from '../lib/brain';
-import { TRIALS, type TrialId } from '../lib/progress';
+import { bossUnlocked, TRIALS, WIN_XP, type BattleId, type TrialId } from '../lib/progress';
 import { CLUSTERS } from '../lib/types';
+import { Battle } from './Battle';
 import { useGame } from './progress';
+import { ENEMIES } from './sprite-data';
+import { Avatar, Sprite } from './sprites';
 
-const AVATAR = [
-  '....hhhh....',
-  '...hhhhhh...',
-  '..hhhhhhhh..',
-  '..hssssssh..',
-  '..hsesseSh..',
-  '..hssssssh..',
-  '...hssssh...',
-  '..rrrrrrrr..',
-  '.rrrryyrrrr.',
-  '.rrrryyrrrr.',
-  '.srrrrrrrrs.',
-  '..rrrrrrrr..',
-  '..rrr..rrr..',
-  '..bbb..bbb..',
-];
-const AVATAR_COLORS: Record<string, string> = {
-  h: '#3b5dc9',
-  s: '#ffcd75',
-  S: '#ffcd75',
-  e: '#1a1c2c',
-  r: '#29366f',
-  y: '#ffcd75',
-  b: '#333c57',
-};
+const BATTLE_IDS: BattleId[] = ['retriever', 'chunking', 'closer', 'boss'];
 
-/** A small original pixel sprite: a hooded scholar. */
-export function Avatar({ size = 48 }: { size?: number }) {
-  return (
-    <svg
-      className="avatar"
-      viewBox="0 0 12 14"
-      width={size}
-      height={(size * 14) / 12}
-      shapeRendering="crispEdges"
-      aria-hidden
-    >
-      {AVATAR.flatMap((row, y) =>
-        [...row].map((cell, x) =>
-          cell === '.' ? null : (
-            <rect key={`${x}-${y}`} x={x} y={y} width="1" height="1" fill={AVATAR_COLORS[cell]} />
-          ),
-        ),
-      )}
-    </svg>
-  );
-}
-
-const TRIAL_IDS: TrialId[] = ['retriever', 'chunking', 'closer'];
-
-export function Trials() {
+export function Trials({ onHero }: { onHero: () => void }) {
   const { t } = useI18n();
   const { progress, gain } = useGame();
-  const [open, setOpen] = useState<TrialId | null>(null);
-  const score = (id: TrialId) => (value: number) => gain({ type: 'trial', id, score: value });
+  const [open, setOpen] = useState<BattleId | null>(null);
+  const onScore = useCallback(
+    (id: TrialId) => (score: number) => gain({ type: 'trial', id, score }),
+    [gain],
+  );
+  const scores = useMemo(
+    () => ({
+      retriever: onScore('retriever'),
+      chunking: onScore('chunking'),
+      closer: onScore('closer'),
+    }),
+    [onScore],
+  );
 
   if (open) {
     return (
-      <section className="trial">
-        <button type="button" className="btn small" onClick={() => setOpen(null)}>
-          ◀ {t.trials.back}
-        </button>
-        <h2>{t.trials.names[open]}</h2>
-        {open === 'retriever' && <RetrieverGame onScore={score('retriever')} />}
-        {open === 'chunking' && <ChunkingLab onScore={score('chunking')} />}
-        {open === 'closer' && <CloserFarther onScore={score('closer')} />}
-      </section>
+      <Battle id={open} onExit={() => setOpen(null)} onHero={onHero}>
+        {(onTurn) => (
+          <>
+            {open === 'retriever' && <RetrieverGame onScore={scores.retriever} onTurn={onTurn} />}
+            {open === 'chunking' && <ChunkingLab onScore={scores.chunking} onTurn={onTurn} />}
+            {open === 'closer' && <CloserFarther onScore={scores.closer} onTurn={onTurn} />}
+            {open === 'boss' && <BossFight onTurn={onTurn} />}
+          </>
+        )}
+      </Battle>
     );
   }
+
+  const unlocked = bossUnlocked(progress);
 
   return (
     <section aria-labelledby="trials-title">
       <h2 id="trials-title">{t.tabs.trials}</h2>
       <ul className="trial-list">
-        {TRIAL_IDS.map((id, i) => {
-          const best = progress.trials[id] ?? 0;
+        {BATTLE_IDS.map((id) => {
+          const locked = id === 'boss' && !unlocked;
+          const beaten = progress.wins.includes(id);
+          const reward = WIN_XP[id] + (id === 'boss' ? 0 : TRIALS[id].max * TRIALS[id].xp);
           return (
             <li key={id}>
-              <button type="button" className="trial-card" onClick={() => setOpen(id)}>
-                <span className="trial-number">{i + 1}</span>
+              <button
+                type="button"
+                className={`trial-card ${id === 'boss' ? 'boss' : ''}`}
+                disabled={locked}
+                onClick={() => setOpen(id)}
+              >
+                <Sprite data={ENEMIES[id]} size={44} className={locked ? 'locked' : ''} />
                 <span>
-                  <b>{t.trials.names[id]}</b>
-                  <small>{t.trials.blurbs[id]}</small>
+                  <b>{locked ? t.map.unknown : t.enemies[id]}</b>
+                  <small>{locked ? t.battle.locked : t.trials.blurbs[id]}</small>
                 </span>
                 <span className="trial-meta">
-                  <span className="pips" aria-hidden>
-                    {Array.from({ length: TRIALS[id].max }, (_, n) => (
-                      <i key={n} className={n < best ? 'on' : ''} />
-                    ))}
-                  </span>
+                  {beaten && <span className="tick">✓ {t.battle.beaten}</span>}
+                  {id !== 'boss' && (
+                    <span className="pips" aria-hidden>
+                      {Array.from({ length: TRIALS[id].max }, (_, n) => (
+                        <i key={n} className={n < (progress.trials[id] ?? 0) ? 'on' : ''} />
+                      ))}
+                    </span>
+                  )}
                   <small>
-                    {t.trials.reward} {TRIALS[id].max * TRIALS[id].xp} XP
+                    {t.trials.reward} {reward} XP
                   </small>
                 </span>
               </button>
@@ -256,6 +236,18 @@ export function HeroSheet() {
         {STACK.map((item) => (
           <li key={item}>{item}</li>
         ))}
+      </ul>
+
+      <h3>{t.sheet.trophies}</h3>
+      <ul className="items trophies">
+        {BATTLE_IDS.map((id) => {
+          const won = progress.wins.includes(id);
+          return (
+            <li key={id} className={won ? 'won' : ''}>
+              {won ? t.loot[id] : t.map.unknown}
+            </li>
+          );
+        })}
       </ul>
 
       <div className="row">

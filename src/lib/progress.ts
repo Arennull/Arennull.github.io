@@ -5,6 +5,8 @@ export interface Progress {
   quests: string[];
   /** Best score per trial. */
   trials: Record<string, number>;
+  /** Battles won at least once. */
+  wins: string[];
   recruited: boolean;
 }
 
@@ -13,15 +15,19 @@ export type ProgressEvent =
   | { type: 'ask'; id: string }
   | { type: 'quest'; id: string }
   | { type: 'trial'; id: TrialId; score: number }
+  | { type: 'win'; id: BattleId }
   | { type: 'recruit' };
 
 export type TrialId = 'retriever' | 'chunking' | 'closer';
+/** Every trial is fought as a battle; the boss only appears once the three are won. */
+export type BattleId = TrialId | 'boss';
 
 export const EMPTY_PROGRESS: Progress = {
   discovered: [],
   asked: [],
   quests: [],
   trials: {},
+  wins: [],
   recruited: false,
 };
 
@@ -33,6 +39,19 @@ export const TRIALS: Record<TrialId, { xp: number; max: number }> = {
 };
 
 const XP = { neuron: 10, ask: 30, quest: 40, recruit: 100 };
+
+/** XP for the first victory in each battle. */
+export const WIN_XP: Record<BattleId, number> = {
+  retriever: 40,
+  chunking: 40,
+  closer: 40,
+  boss: 150,
+};
+
+const TRIAL_IDS = Object.keys(TRIALS) as TrialId[];
+const isBattle = (id: string): id is BattleId => Object.hasOwn(WIN_XP, id);
+
+export const bossUnlocked = (p: Progress) => TRIAL_IDS.every((id) => p.wins.includes(id));
 
 /** XP needed to reach each level; index 0 is level 1. */
 export const LEVELS = [0, 60, 160, 320, 520, 780, 1100];
@@ -52,13 +71,15 @@ export function applyEvent(p: Progress, event: ProgressEvent): Progress {
       if (score <= (p.trials[event.id] ?? 0)) return p;
       return { ...p, trials: { ...p.trials, [event.id]: score } };
     }
+    case 'win':
+      return p.wins.includes(event.id) ? p : { ...p, wins: [...p.wins, event.id] };
     case 'recruit':
       return p.recruited ? p : { ...p, recruited: true };
   }
 }
 
 export function xpOf(p: Progress): number {
-  const trials = (Object.keys(TRIALS) as TrialId[]).reduce(
+  const trials = TRIAL_IDS.reduce(
     (sum, id) => sum + Math.min(TRIALS[id].max, p.trials[id] ?? 0) * TRIALS[id].xp,
     0,
   );
@@ -67,6 +88,7 @@ export function xpOf(p: Progress): number {
     p.asked.length * XP.ask +
     p.quests.length * XP.quest +
     trials +
+    p.wins.filter(isBattle).reduce((sum, id) => sum + WIN_XP[id], 0) +
     (p.recruited ? XP.recruit : 0)
   );
 }
@@ -89,8 +111,9 @@ export function levelOf(xp: number): LevelInfo {
 export interface Objectives {
   explore: boolean;
   ask: boolean;
-  trial: boolean;
+  battle: boolean;
   quest: boolean;
+  boss: boolean;
   recruit: boolean;
 }
 
@@ -100,8 +123,9 @@ export function objectivesOf(p: Progress): Objectives {
   return {
     explore: p.discovered.length >= EXPLORE_GOAL,
     ask: p.asked.length > 0,
-    trial: Object.values(p.trials).some((score) => score > 0),
+    battle: p.wins.length > 0,
     quest: p.quests.length > 0,
+    boss: p.wins.includes('boss'),
     recruit: p.recruited,
   };
 }
@@ -123,6 +147,7 @@ export function parseProgress(raw: string | null): Progress {
       asked: strings(data.asked),
       quests: strings(data.quests),
       trials,
+      wins: [...new Set(strings(data.wins).filter(isBattle))],
       recruited: data.recruited === true,
     };
   } catch {

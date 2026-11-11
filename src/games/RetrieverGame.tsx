@@ -36,7 +36,12 @@ export function buildRounds(seed: number): Round[] {
   });
 }
 
-export function RetrieverGame({ onScore }: { onScore: (hits: number) => void }) {
+interface Props {
+  onScore: (hits: number) => void;
+  onTurn: (hits: number, misses: number) => void;
+}
+
+export function RetrieverGame({ onScore, onTurn }: Props) {
   const { t, lang } = useI18n();
   const [seed, setSeed] = useState(() => Math.floor(Math.random() * 1e9));
   const rounds = useMemo(() => buildRounds(seed), [seed]);
@@ -65,6 +70,7 @@ export function RetrieverGame({ onScore }: { onScore: (hits: number) => void }) 
     setRevealed(true);
     setTotal(total + hits);
     onScore(total + hits);
+    onTurn(hits, TOP - hits);
   };
 
   const next = () => {

@@ -6,6 +6,7 @@ import { CLUSTER_COLORS, PALETTE } from '../i18n/strings';
 import { edges, neurons } from '../lib/brain';
 import { seeded } from '../lib/random';
 import type { Lang } from '../lib/types';
+import { Avatar } from '../ui/sprites';
 import { generateCortex, toScene } from './shape';
 
 export interface BrainQuery {
@@ -21,6 +22,10 @@ export interface BrainSceneProps {
   /** Neurons used as sources: brightest, and labelled. */
   sources: number[];
   selected: number | null;
+  /** Neuron the hero is standing on. */
+  hero: number;
+  /** Whether the arrow keys move the hero. */
+  keys: boolean;
   /** Neurons the visitor has already found; the rest show as unknown. */
   discovered: ReadonlySet<number>;
   unknownLabel: string;
@@ -35,6 +40,23 @@ export interface BrainSceneProps {
 const POSITIONS = neurons.map((n) => new THREE.Vector3(...toScene(n.pos)));
 const COLORS = neurons.map((n) => new THREE.Color(CLUSTER_COLORS[n.node.cluster]));
 const UNKNOWN = new THREE.Color(PALETTE.silver);
+const PATH = new THREE.Color(PALETTE.yellow);
+
+/** Neurons joined by a synapse: the paths the hero can walk. */
+const PATHS: number[][] = neurons.map(() => []);
+for (const [a, b] of edges) {
+  PATHS[a]!.push(b);
+  PATHS[b]!.push(a);
+}
+
+const KEY_DIRECTIONS: Record<string, [number, number]> = {
+  ArrowUp: [0, 1],
+  ArrowDown: [0, -1],
+  ArrowLeft: [-1, 0],
+  ArrowRight: [1, 0],
+};
+/** How well a path must line up with the arrow pressed (cosine of the angle) to be taken. */
+const MIN_ALIGNMENT = 0.3;
 const WAVE_SECONDS = 1.6;
 /** Rendered at half resolution and scaled up without smoothing: chunky pixels. */
 const PIXEL_DPR = 0.5;
@@ -297,7 +319,7 @@ function Neurons({
   );
 }
 
-function Synapses({ lit, sources }: Pick<BrainSceneProps, 'lit' | 'sources'>) {
+function Synapses({ lit, sources, hero }: Pick<BrainSceneProps, 'lit' | 'sources' | 'hero'>) {
   const geometry = useMemo(() => {
     const positions = new Float32Array(edges.length * 6);
     edges.forEach(([a, b], i) => {
@@ -318,14 +340,16 @@ function Synapses({ lit, sources }: Pick<BrainSceneProps, 'lit' | 'sources'>) {
     const base = new THREE.Color(PALETTE.slate);
     edges.forEach(([a, b, sim], i) => {
       const on = active.has(a) && active.has(b);
-      const strength = on ? 0.9 : active.size > 0 ? 0.05 : 0.06 + 0.14 * sim;
-      const ca = on ? COLORS[a]! : base;
-      const cb = on ? COLORS[b]! : base;
+      // With nothing else going on, the paths out of the hero's neuron stand out.
+      const path = active.size === 0 && (a === hero || b === hero);
+      const strength = on ? 0.9 : path ? 0.7 : active.size > 0 ? 0.05 : 0.06 + 0.14 * sim;
+      const ca = on ? COLORS[a]! : path ? PATH : base;
+      const cb = on ? COLORS[b]! : path ? PATH : base;
       colors.setXYZ(i * 2, ca.r * strength, ca.g * strength, ca.b * strength);
       colors.setXYZ(i * 2 + 1, cb.r * strength, cb.g * strength, cb.b * strength);
     });
     colors.needsUpdate = true;
-  }, [geometry, lit, sources]);
+  }, [geometry, lit, sources, hero]);
 
   return (
     <lineSegments geometry={geometry}>
@@ -406,6 +430,69 @@ function QueryBeams({
   );
 }
 
+/** The hero sprite, walking from neuron to neuron. */
+function HeroMarker({ at, reducedMotion }: { at: number; reducedMotion: boolean }) {
+  const group = useRef<THREE.Group>(null);
+  const placed = useRef(false);
+
+  useFrame(() => {
+    const g = group.current;
+    if (!g) return;
+    const target = POSITIONS[at]!;
+    if (reducedMotion || !placed.current) g.position.copy(target);
+    else g.position.lerp(target, 0.14);
+    placed.current = true;
+  });
+
+  return (
+    <group ref={group}>
+      <Html center position={[0, 0.17, 0]} zIndexRange={[6, 5]} className="hero-marker">
+        <Avatar size={22} />
+      </Html>
+    </group>
+  );
+}
+
+/** Arrow keys walk the hero along the synapse that points that way on screen. */
+function KeyTravel({ from, onTravel }: { from: number; onTravel: (index: number) => void }) {
+  const camera = useThree((s) => s.camera);
+  const aspect = useThree((s) => s.size.width / s.size.height);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const direction = KEY_DIRECTIONS[e.key];
+      if (!direction || e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+      const target = e.target;
+      if (
+        target instanceof HTMLElement &&
+        (target.isContentEditable || target.closest('input, textarea, select'))
+      ) {
+        return;
+      }
+      const here = POSITIONS[from]!.clone().project(camera);
+      let best = -1;
+      let bestScore = MIN_ALIGNMENT;
+      for (const index of PATHS[from]!) {
+        const there = POSITIONS[index]!.clone().project(camera);
+        const dx = (there.x - here.x) * aspect;
+        const dy = there.y - here.y;
+        const score = (dx * direction[0] + dy * direction[1]) / (Math.hypot(dx, dy) || 1);
+        if (score > bestScore) {
+          bestScore = score;
+          best = index;
+        }
+      }
+      if (best < 0) return;
+      e.preventDefault();
+      onTravel(best);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [camera, aspect, from, onTravel]);
+
+  return null;
+}
+
 /** Orbit controls that back the camera off on narrow canvases so the brain always fits. */
 function FramedControls(props: React.ComponentProps<typeof OrbitControls>) {
   const aspect = useThree((s) => s.size.width / s.size.height);
@@ -415,7 +502,7 @@ function FramedControls(props: React.ComponentProps<typeof OrbitControls>) {
 
 export default function BrainScene(props: BrainSceneProps) {
   const { lit, sources, selected, query, onSelect, reducedMotion, lowPower, active, lang } = props;
-  const { discovered, unknownLabel } = props;
+  const { discovered, unknownLabel, hero, keys } = props;
   const [hovered, setHovered] = useState<number | null>(null);
   const [dragging, setDragging] = useState(false);
 
@@ -442,7 +529,9 @@ export default function BrainScene(props: BrainSceneProps) {
         dimmed={lit.length > 0 || sources.length > 0}
         reducedMotion={reducedMotion}
       />
-      <Synapses lit={lit} sources={sources} />
+      <Synapses lit={lit} sources={sources} hero={hero} />
+      <HeroMarker at={hero} reducedMotion={reducedMotion} />
+      {keys && active && <KeyTravel from={hero} onTravel={onSelect} />}
       <Neurons
         lit={lit}
         sources={sources}

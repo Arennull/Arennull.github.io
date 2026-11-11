@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   applyEvent,
+  bossUnlocked,
   EMPTY_PROGRESS,
   LEVELS,
   levelOf,
@@ -63,6 +64,7 @@ describe('levels', () => {
       { type: 'trial', id: 'retriever', score: 9 },
       { type: 'trial', id: 'chunking', score: 3 },
       { type: 'trial', id: 'closer', score: 5 },
+      { type: 'win', id: 'boss' },
       { type: 'recruit' },
     );
     expect(levelOf(xpOf(everything)).level).toBe(LEVELS.length);
@@ -74,28 +76,51 @@ describe('objectives', () => {
     expect(Object.values(objectivesOf(EMPTY_PROGRESS)).some(Boolean)).toBe(false);
     const p = play(
       { type: 'discover', ids: ['1', '2', '3', '4', '5', '6', '7', '8'] },
-      { type: 'trial', id: 'closer', score: 1 },
+      { type: 'win', id: 'closer' },
     );
     expect(objectivesOf(p)).toEqual({
       explore: true,
       ask: false,
-      trial: true,
+      battle: true,
       quest: false,
+      boss: false,
       recruit: false,
     });
   });
 });
 
+describe('battles', () => {
+  it('pay once per enemy', () => {
+    const once = play({ type: 'win', id: 'closer' });
+    expect(xpOf(once)).toBe(40);
+    expect(applyEvent(once, { type: 'win', id: 'closer' })).toBe(once);
+  });
+
+  it('unlock the boss only after the three guardians fall', () => {
+    const two = play({ type: 'win', id: 'retriever' }, { type: 'win', id: 'chunking' });
+    expect(bossUnlocked(two)).toBe(false);
+    expect(bossUnlocked(applyEvent(two, { type: 'win', id: 'closer' }))).toBe(true);
+  });
+});
+
 describe('parseProgress', () => {
   it('round-trips a saved game', () => {
-    const p = play({ type: 'discover', ids: ['a'] }, { type: 'trial', id: 'closer', score: 2 });
+    const p = play(
+      { type: 'discover', ids: ['a'] },
+      { type: 'trial', id: 'closer', score: 2 },
+      { type: 'win', id: 'closer' },
+    );
     expect(parseProgress(JSON.stringify(p))).toEqual(p);
   });
 
   it('starts over on garbage instead of crashing', () => {
     expect(parseProgress(null)).toEqual(EMPTY_PROGRESS);
     expect(parseProgress('{oops')).toEqual(EMPTY_PROGRESS);
-    expect(parseProgress('{"discovered":[1,"a"],"trials":{"closer":"x","hack":5}}')).toEqual({
+    expect(
+      parseProgress(
+        '{"discovered":[1,"a"],"trials":{"closer":"x","hack":5},"wins":["dragon","toString"]}',
+      ),
+    ).toEqual({
       ...EMPTY_PROGRESS,
       discovered: ['a'],
     });

@@ -34,7 +34,12 @@ function readBest(): number {
   }
 }
 
-export function CloserFarther({ onScore }: { onScore: (streak: number) => void }) {
+interface Props {
+  onScore: (streak: number) => void;
+  onTurn: (hits: number, misses: number) => void;
+}
+
+export function CloserFarther({ onScore, onTurn }: Props) {
   const { t, lang } = useI18n();
   const [duel, setDuel] = useState(() => makeDuel(Math.random));
   const [choice, setChoice] = useState<0 | 1 | null>(null);
@@ -50,6 +55,8 @@ export function CloserFarther({ onScore }: { onScore: (streak: number) => void }
     const nextStreak = index === winner ? streak + 1 : 0;
     setStreak(nextStreak);
     onScore(nextStreak);
+    if (index === winner) onTurn(1, 0);
+    else onTurn(0, 1);
     if (nextStreak > best) {
       setBest(nextStreak);
       try {

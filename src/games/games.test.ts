@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { CHUNK_OVERLAPS, CHUNK_SIZES, chunkingQuestions } from '../../content/games';
+import { BATTLES } from '../lib/battle';
+import { embeddedQueries, retrieve } from '../lib/brain';
 import { seeded } from '../lib/random';
+import { buildBossRounds } from './BossFight';
 import { runLab } from './ChunkingLab';
 import { makeDuel } from './CloserFarther';
 import { buildRounds } from './RetrieverGame';
@@ -59,5 +62,29 @@ describe('Closer or farther', () => {
       expect(new Set(ids).size).toBe(3);
       expect(Math.abs(duel.scores[0] - duel.scores[1])).toBeGreaterThanOrEqual(0.08);
     }
+  });
+});
+
+describe('boss fight', () => {
+  it('offers one cited fragment per question, among fragments the search would not return', () => {
+    const rounds = buildBossRounds(7);
+    expect(rounds).toHaveLength(embeddedQueries.length);
+    for (const round of rounds) {
+      const { query, vec } = embeddedQueries[round.queryIndex]!;
+      expect(round.options).toHaveLength(3);
+      expect(query.cites).toContain(round.truth);
+      const decoys = round.options.filter((o) => o.node.id !== round.truth).map((o) => o.node.id);
+      expect(decoys).toHaveLength(2);
+      for (const lang of ['en', 'es'] as const) {
+        const sources = retrieve(vec, query.question[lang], lang).final.map((s) => s.item.node.id);
+        for (const decoy of decoys) expect(sources).not.toContain(decoy);
+      }
+    }
+  });
+
+  it('has enough rounds for the longest possible fight', () => {
+    expect(embeddedQueries.length).toBeGreaterThanOrEqual(
+      BATTLES.boss.enemy + BATTLES.boss.hero - 1,
+    );
   });
 });
