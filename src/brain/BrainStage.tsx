@@ -1,8 +1,8 @@
 import { Component, lazy, Suspense, useMemo, useRef, type ReactNode } from 'react';
 import { useInView, useLowPower, useReducedMotion } from '../hooks';
 import { useI18n } from '../i18n';
-import { CLUSTER_COLORS } from '../i18n/strings';
-import { neighbours, neurons } from '../lib/brain';
+import { CLUSTER_COLORS, PALETTE } from '../i18n/strings';
+import { neurons } from '../lib/brain';
 import type { BrainQuery } from './BrainScene';
 import { toScene } from './shape';
 
@@ -27,16 +27,17 @@ class SceneBoundary extends Component<{ fallback: ReactNode; children: ReactNode
   }
 }
 
-interface StageProps {
+export interface StageProps {
   lit: number[];
   sources: number[];
   selected: number | null;
+  discovered: ReadonlySet<number>;
   query: BrainQuery | null;
   onSelect: (index: number | null) => void;
 }
 
 /** Flat map of the same neurons, for browsers without WebGL. */
-function Brain2D({ lit, sources, selected, onSelect }: StageProps) {
+function Brain2D({ lit, sources, selected, discovered, onSelect }: StageProps) {
   const { t, lang } = useI18n();
   const active = new Set([...lit, ...sources]);
   return (
@@ -45,67 +46,33 @@ function Brain2D({ lit, sources, selected, onSelect }: StageProps) {
         <ellipse cx="0" cy="-0.05" rx="0.93" ry="0.62" className="brain2d-outline" />
         {neurons.map((n, i) => {
           const [x, y] = toScene(n.pos);
-          const on = active.size === 0 || active.has(i);
+          const known = discovered.has(i) || active.has(i) || selected === i;
+          const size = selected === i ? 0.07 : 0.045;
+          const toggle = () => onSelect(selected === i ? null : i);
           return (
-            <circle
+            <rect
               key={n.node.id}
-              cx={x}
-              cy={-y}
-              r={selected === i ? 0.04 : 0.026}
-              fill={CLUSTER_COLORS[n.node.cluster]}
-              opacity={on ? 1 : 0.2}
+              x={x - size / 2}
+              y={-y - size / 2}
+              width={size}
+              height={size}
+              fill={known ? CLUSTER_COLORS[n.node.cluster] : PALETTE.slate}
+              opacity={active.size === 0 || active.has(i) ? 1 : 0.3}
               role="button"
               tabIndex={0}
-              aria-label={n.node.title[lang]}
-              onClick={() => onSelect(selected === i ? null : i)}
+              aria-label={known ? n.node.title[lang] : t.map.undiscovered}
+              onClick={toggle}
               onKeyDown={(e) => {
                 if (e.key !== 'Enter' && e.key !== ' ') return;
                 e.preventDefault();
-                onSelect(selected === i ? null : i);
+                toggle();
               }}
-            >
-              <title>{n.node.title[lang]}</title>
-            </circle>
+            />
           );
         })}
       </svg>
       <figcaption>{t.fallback}</figcaption>
     </figure>
-  );
-}
-
-function NeuronCard({ index, onSelect }: { index: number; onSelect: StageProps['onSelect'] }) {
-  const { t, lang } = useI18n();
-  const neuron = neurons[index]!;
-  const near = useMemo(() => neighbours(neuron, 3), [neuron]);
-  const color = CLUSTER_COLORS[neuron.node.cluster];
-  return (
-    <aside className="neuron-card" style={{ borderColor: color }} aria-live="polite">
-      <header>
-        <span className="tag" style={{ color }}>
-          {t.clusters[neuron.node.cluster]}
-        </span>
-        <button type="button" className="ghost" onClick={() => onSelect(null)}>
-          {t.neuron.close}
-        </button>
-      </header>
-      <h3>{neuron.node.title[lang]}</h3>
-      <p>{neuron.node.text[lang]}</p>
-      <h4>{t.neuron.neighbours}</h4>
-      <ul>
-        {near.map((s) => (
-          <li key={s.item.node.id}>
-            <button type="button" onClick={() => onSelect(s.item.index)}>
-              <i style={{ background: CLUSTER_COLORS[s.item.node.cluster] }} />
-              {s.item.node.title[lang]}
-            </button>
-            <span className="mono">
-              {t.neuron.cosine} {s.score.toFixed(2)}
-            </span>
-          </li>
-        ))}
-      </ul>
-    </aside>
   );
 }
 
@@ -125,6 +92,7 @@ export function BrainStage(props: StageProps) {
           <Suspense fallback={<div className="brain-loading" aria-hidden />}>
             <BrainScene
               {...props}
+              unknownLabel={t.map.unknown}
               reducedMotion={reducedMotion}
               lowPower={lowPower}
               active={inView}
@@ -135,11 +103,7 @@ export function BrainStage(props: StageProps) {
       ) : (
         flat
       )}
-      {props.selected === null ? (
-        <p className="brain-hint mono">{t.hero.hint}</p>
-      ) : (
-        <NeuronCard index={props.selected} onSelect={props.onSelect} />
-      )}
+      <p className="brain-hint">{t.map.drag}</p>
     </div>
   );
 }

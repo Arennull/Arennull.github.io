@@ -1,23 +1,25 @@
 # Portfolio de Alejandro Tiscar
 
-Web personal publicada en <https://arennull.github.io>. Un cerebro 3D interactivo cuyas neuronas son fragmentos de conocimiento con embeddings reales, un panel que enseña paso a paso una recuperación híbrida y tres minijuegos sobre esos mismos vectores.
+Web personal publicada en <https://arennull.github.io>, planteada como un pequeño RPG: el mapa es un cerebro 3D cuyas neuronas son fragmentos de conocimiento con embeddings reales. El visitante las descubre, pregunta al Oráculo, supera pruebas y gana experiencia.
 
 ## Qué hay dentro
 
-- **Cerebro 3D** (Three.js con React Three Fiber): corteza de partículas generada por código; cada neurona se coloca según la proyección UMAP de su embedding.
-- **Ask my brain**: para cada pregunta se calcula en el navegador la búsqueda vectorial (coseno), la búsqueda por palabras (BM25) y su fusión por rango recíproco. Solo la redacción de la respuesta está escrita de antemano.
-- **Lab**: «Sé el retriever», «Chunking lab» y «Más cerca o más lejos».
-- Bilingüe (inglés y español), sin backend y sin claves.
+- **Mapa** (Three.js con React Three Fiber, renderizado en píxeles): corteza de partículas generada por código; cada neurona se coloca según la proyección UMAP de su embedding y empieza oculta hasta que se descubre.
+- **Oráculo**: para cada pregunta se calcula en el navegador la búsqueda vectorial (coseno), la búsqueda por palabras (BM25) y su fusión por rango recíproco. Solo la redacción de la respuesta está escrita de antemano.
+- **Pruebas**: «Sé el retriever», «Chunking lab» y «Más cerca o más lejos».
+- **Misiones** (proyectos) y **Héroe** (ficha, stack y contacto).
+- Progreso con XP, niveles y objetivos, guardado en el navegador.
+- Bilingüe (inglés y español), sin backend y sin claves. Botón «Saltar al CV» para quien no quiera jugar.
 
 ## Cómo funciona
 
 ```
 content/                 textos: fragmentos, preguntas, juegos y proyectos (en/es)
 scripts/build-brain.ts   vectoriza el contenido y escribe src/data/brain.json
-src/lib/                 lógica pura con tests: vectores, BM25, RRF, troceado
+src/lib/                 lógica pura con tests: vectores, BM25, RRF, troceado, progreso
 src/brain/               escena 3D
 src/games/               minijuegos
-src/sections/            secciones de la página
+src/ui/                  HUD, menú, diálogo y paneles del juego
 ```
 
 Los embeddings se calculan una vez, al ejecutar `npm run build:brain`, con el modelo multilingüe `paraphrase-multilingual-MiniLM-L12-v2` (384 dimensiones). Los vectores se cuantizan a 8 bits y se guardan en `src/data/brain.json`, que está en el repositorio: ni la CI ni el navegador descargan el modelo.

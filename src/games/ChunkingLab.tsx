@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { CHUNK_OVERLAPS, CHUNK_SIZES } from '../../content/games';
 import { useI18n } from '../i18n';
 import {
@@ -38,9 +38,9 @@ export function runLab(lang: Lang, size: number, overlap: number, questionId: st
   };
 }
 
-export function ChunkingLab() {
+export function ChunkingLab({ onScore }: { onScore: (solved: number) => void }) {
   const { t, lang } = useI18n();
-  const [size, setSize] = useState<number>(CHUNK_SIZES[1]);
+  const [size, setSize] = useState<number>(CHUNK_SIZES[0]);
   const [overlap, setOverlap] = useState<number>(CHUNK_OVERLAPS[0]);
   const [questionId, setQuestionId] = useState(chunkingQuestions[1]!.id);
 
@@ -48,6 +48,14 @@ export function ChunkingLab() {
     () => runLab(lang, size, overlap, questionId),
     [lang, size, overlap, questionId],
   );
+
+  // Each question counts once, the first time its answer comes back whole and on top.
+  const solved = useRef(new Set<string>());
+  useEffect(() => {
+    if (result.answerRank !== 1) return;
+    solved.current.add(questionId);
+    onScore(solved.current.size);
+  }, [result, questionId, onScore]);
 
   const verdict =
     result.answerRank === 1
@@ -133,7 +141,7 @@ export function ChunkingLab() {
       </ol>
 
       <p className="lesson">
-        <b>{t.lab.learned}</b> {t.chunking.lesson}
+        <b>{t.trials.learned}</b> {t.chunking.lesson}
       </p>
     </div>
   );

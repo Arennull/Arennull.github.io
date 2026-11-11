@@ -36,7 +36,7 @@ export function buildRounds(seed: number): Round[] {
   });
 }
 
-export function RetrieverGame() {
+export function RetrieverGame({ onScore }: { onScore: (hits: number) => void }) {
   const { t, lang } = useI18n();
   const [seed, setSeed] = useState(() => Math.floor(Math.random() * 1e9));
   const rounds = useMemo(() => buildRounds(seed), [seed]);
@@ -63,7 +63,8 @@ export function RetrieverGame() {
 
   const reveal = () => {
     setRevealed(true);
-    setTotal((s) => s + hits);
+    setTotal(total + hits);
+    onScore(total + hits);
   };
 
   const next = () => {
@@ -153,7 +154,7 @@ export function RetrieverGame() {
       </div>
       {revealed && (
         <p className="lesson">
-          <b>{t.lab.learned}</b> {t.retriever.lesson}
+          <b>{t.trials.learned}</b> {t.retriever.lesson}
         </p>
       )}
     </div>

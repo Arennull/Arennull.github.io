@@ -34,7 +34,7 @@ function readBest(): number {
   }
 }
 
-export function CloserFarther() {
+export function CloserFarther({ onScore }: { onScore: (streak: number) => void }) {
   const { t, lang } = useI18n();
   const [duel, setDuel] = useState(() => makeDuel(Math.random));
   const [choice, setChoice] = useState<0 | 1 | null>(null);
@@ -49,6 +49,7 @@ export function CloserFarther() {
     setChoice(index);
     const nextStreak = index === winner ? streak + 1 : 0;
     setStreak(nextStreak);
+    onScore(nextStreak);
     if (nextStreak > best) {
       setBest(nextStreak);
       try {
@@ -113,7 +114,7 @@ export function CloserFarther() {
       </div>
       {choice !== null && (
         <p className="lesson">
-          <b>{t.lab.learned}</b> {t.closer.lesson}
+          <b>{t.trials.learned}</b> {t.closer.lesson}
         </p>
       )}
     </div>

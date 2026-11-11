@@ -1,9 +1,8 @@
 import { Html, OrbitControls } from '@react-three/drei';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Bloom, EffectComposer } from '@react-three/postprocessing';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { CLUSTER_COLORS } from '../i18n/strings';
+import { CLUSTER_COLORS, PALETTE } from '../i18n/strings';
 import { edges, neurons } from '../lib/brain';
 import { seeded } from '../lib/random';
 import type { Lang } from '../lib/types';
@@ -22,6 +21,9 @@ export interface BrainSceneProps {
   /** Neurons used as sources: brightest, and labelled. */
   sources: number[];
   selected: number | null;
+  /** Neurons the visitor has already found; the rest show as unknown. */
+  discovered: ReadonlySet<number>;
+  unknownLabel: string;
   query: BrainQuery | null;
   onSelect: (index: number | null) => void;
   reducedMotion: boolean;
@@ -32,7 +34,10 @@ export interface BrainSceneProps {
 
 const POSITIONS = neurons.map((n) => new THREE.Vector3(...toScene(n.pos)));
 const COLORS = neurons.map((n) => new THREE.Color(CLUSTER_COLORS[n.node.cluster]));
+const UNKNOWN = new THREE.Color(PALETTE.silver);
 const WAVE_SECONDS = 1.6;
+/** Rendered at half resolution and scaled up without smoothing: chunky pixels. */
+const PIXEL_DPR = 0.5;
 
 const cortexVertex = /* glsl */ `
   attribute float aShade;
@@ -53,7 +58,7 @@ const cortexVertex = /* glsl */ `
       : smoothstep(0.16, 0.0, abs(d - uPulse * 1.9)) * (1.0 - uPulse);
     vWave = wave;
     vAlpha = (0.16 + 0.6 * aShade * aShade) * twinkle * uDim + wave * 0.9;
-    gl_PointSize = uSize * (0.7 + 0.9 * aShade + wave * 1.6) / -mv.z;
+    gl_PointSize = max(1.0, uSize * (0.7 + 0.9 * aShade + wave * 1.6) / -mv.z);
     gl_Position = projectionMatrix * mv;
   }
 `;
@@ -65,13 +70,9 @@ const cortexFragment = /* glsl */ `
   varying float vAlpha;
   varying float vWave;
   void main() {
-    vec2 c = gl_PointCoord - 0.5;
-    float r = dot(c, c);
-    if (r > 0.25) discard;
-    float soft = smoothstep(0.25, 0.0, r);
     vec3 col = mix(uColorA, uColorB, clamp(vAlpha * 1.4, 0.0, 1.0));
     col = mix(col, uWaveColor, clamp(vWave, 0.0, 1.0));
-    gl_FragColor = vec4(col, vAlpha * soft);
+    gl_FragColor = vec4(col, clamp(vAlpha, 0.0, 1.0));
   }
 `;
 
@@ -107,9 +108,9 @@ function Cortex({
       uPulse: { value: -1 },
       uDim: { value: 1 },
       uOrigin: { value: new THREE.Vector3() },
-      uColorA: { value: new THREE.Color('#5870a8') },
-      uColorB: { value: new THREE.Color('#c9d6f2') },
-      uWaveColor: { value: new THREE.Color('#ffd9a0') },
+      uColorA: { value: new THREE.Color(PALETTE.blue) },
+      uColorB: { value: new THREE.Color(PALETTE.silver) },
+      uWaveColor: { value: new THREE.Color(PALETTE.yellow) },
     }),
     [],
   );
@@ -127,7 +128,7 @@ function Cortex({
     if (!m) return;
     const now = clock.elapsedTime;
     uniforms.uTime.value = reducedMotion ? 0 : now;
-    uniforms.uSize.value = 10.5 * dpr * (size.height / 760);
+    uniforms.uSize.value = 9 * dpr * (size.height / 760);
     const targetDim = dimmed ? 0.55 : 1;
     uniforms.uDim.value += (targetDim - uniforms.uDim.value) * 0.08;
 
@@ -184,12 +185,24 @@ function Neurons({
   lit,
   sources,
   selected,
+  discovered,
+  unknownLabel,
   hovered,
   onHover,
   onSelect,
   reducedMotion,
   lang,
-}: Pick<BrainSceneProps, 'lit' | 'sources' | 'selected' | 'onSelect' | 'reducedMotion' | 'lang'> & {
+}: Pick<
+  BrainSceneProps,
+  | 'lit'
+  | 'sources'
+  | 'selected'
+  | 'discovered'
+  | 'unknownLabel'
+  | 'onSelect'
+  | 'reducedMotion'
+  | 'lang'
+> & {
   hovered: number | null;
   onHover: (index: number | null) => void;
 }) {
@@ -220,6 +233,12 @@ function Neurons({
     });
   });
 
+  const known = (i: number) =>
+    discovered.has(i) || litSet.has(i) || sourceSet.has(i) || selected === i;
+
+  // A region scan shows colours, but a name still has to be earned.
+  const named = (i: number) => discovered.has(i) || sourceSet.has(i) || selected === i;
+
   const labelled = new Set<number>(sources);
   if (hovered !== null) labelled.add(hovered);
   if (selected !== null) labelled.add(selected);
@@ -235,7 +254,7 @@ function Neurons({
           >
             <spriteMaterial
               map={glow}
-              color={COLORS[i]}
+              color={known(i) ? COLORS[i] : UNKNOWN}
               transparent
               depthWrite={false}
               blending={THREE.AdditiveBlending}
@@ -246,8 +265,8 @@ function Neurons({
               cores.current[i] = el;
             }}
           >
-            <sphereGeometry args={[0.016, 12, 12]} />
-            <meshBasicMaterial color={COLORS[i]} toneMapped={false} />
+            <boxGeometry args={[0.042, 0.042, 0.042]} />
+            <meshBasicMaterial color={known(i) ? COLORS[i] : UNKNOWN} toneMapped={false} />
           </mesh>
           <mesh
             onPointerOver={(e) => {
@@ -265,8 +284,10 @@ function Neurons({
           </mesh>
           {labelled.has(i) && (
             <Html center position={[0, 0.075, 0]} zIndexRange={[4, 0]} className="neuron-label">
-              <span style={{ borderColor: CLUSTER_COLORS[n.node.cluster] }}>
-                {n.node.title[lang]}
+              <span
+                style={{ borderColor: named(i) ? CLUSTER_COLORS[n.node.cluster] : PALETTE.slate }}
+              >
+                {named(i) ? n.node.title[lang] : unknownLabel}
               </span>
             </Html>
           )}
@@ -294,10 +315,10 @@ function Synapses({ lit, sources }: Pick<BrainSceneProps, 'lit' | 'sources'>) {
   useEffect(() => {
     const active = new Set([...lit, ...sources]);
     const colors = geometry.getAttribute('color') as THREE.BufferAttribute;
-    const base = new THREE.Color('#5a6788');
+    const base = new THREE.Color(PALETTE.slate);
     edges.forEach(([a, b, sim], i) => {
       const on = active.has(a) && active.has(b);
-      const strength = on ? 0.9 : active.size > 0 ? 0.05 : 0.1 + 0.25 * sim;
+      const strength = on ? 0.9 : active.size > 0 ? 0.05 : 0.06 + 0.14 * sim;
       const ca = on ? COLORS[a]! : base;
       const cb = on ? COLORS[b]! : base;
       colors.setXYZ(i * 2, ca.r * strength, ca.g * strength, ca.b * strength);
@@ -374,7 +395,7 @@ function QueryBeams({
       </sprite>
       <lineSegments geometry={geometry} frustumCulled={false}>
         <lineBasicMaterial
-          color="#ffe2b8"
+          color={PALETTE.yellow}
           transparent
           opacity={0.55}
           depthWrite={false}
@@ -394,6 +415,7 @@ function FramedControls(props: React.ComponentProps<typeof OrbitControls>) {
 
 export default function BrainScene(props: BrainSceneProps) {
   const { lit, sources, selected, query, onSelect, reducedMotion, lowPower, active, lang } = props;
+  const { discovered, unknownLabel } = props;
   const [hovered, setHovered] = useState<number | null>(null);
   const [dragging, setDragging] = useState(false);
 
@@ -408,12 +430,12 @@ export default function BrainScene(props: BrainSceneProps) {
     <Canvas
       flat
       camera={{ position: [0.85, 0.3, 2.45], fov: 40 }}
-      dpr={[1, lowPower ? 1.5 : 2]}
-      gl={{ antialias: !lowPower, alpha: true, powerPreference: 'high-performance' }}
+      dpr={PIXEL_DPR}
+      gl={{ antialias: false, alpha: true, powerPreference: 'high-performance' }}
       frameloop={active ? 'always' : 'never'}
       onPointerMissed={() => onSelect(null)}
     >
-      <color attach="background" args={['#090a0f']} />
+      <color attach="background" args={[PALETTE.night]} />
       <Cortex
         count={lowPower ? 9000 : 22000}
         query={query}
@@ -425,6 +447,8 @@ export default function BrainScene(props: BrainSceneProps) {
         lit={lit}
         sources={sources}
         selected={selected}
+        discovered={discovered}
+        unknownLabel={unknownLabel}
         hovered={hovered}
         onHover={setHovered}
         onSelect={onSelect}
@@ -445,11 +469,6 @@ export default function BrainScene(props: BrainSceneProps) {
         onStart={() => setDragging(true)}
         onEnd={() => setDragging(false)}
       />
-      {!lowPower && (
-        <EffectComposer>
-          <Bloom intensity={0.7} luminanceThreshold={0.35} luminanceSmoothing={0.3} mipmapBlur />
-        </EffectComposer>
-      )}
     </Canvas>
   );
 }
