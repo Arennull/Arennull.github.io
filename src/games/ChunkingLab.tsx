@@ -40,10 +40,9 @@ export function runLab(lang: Lang, size: number, overlap: number, questionId: st
 
 interface Props {
   onScore: (solved: number) => void;
-  onTurn: (hits: number, misses: number) => void;
 }
 
-export function ChunkingLab({ onScore, onTurn }: Props) {
+export function ChunkingLab({ onScore }: Props) {
   const { t, lang } = useI18n();
   const [size, setSize] = useState<number>(CHUNK_SIZES[0]);
   const [overlap, setOverlap] = useState<number>(CHUNK_OVERLAPS[0]);
@@ -55,27 +54,12 @@ export function ChunkingLab({ onScore, onTurn }: Props) {
   );
 
   // Each question counts once, the first time its answer comes back whole and on top.
-  // A new cut that still leaves the answer broken is a wasted move.
   const solved = useRef(new Set<string>());
-  const lastCut = useRef(`${size}/${overlap}`);
-  const lastLang = useRef(lang);
   useEffect(() => {
-    // The same cut can score differently in the other language; switching is not a move.
-    const translated = lang !== lastLang.current;
-    lastLang.current = lang;
-    if (translated) return;
-    const cut = `${size}/${overlap}`;
-    const moved = cut !== lastCut.current;
-    lastCut.current = cut;
-    if (result.answerRank !== 1) {
-      if (moved) onTurn(0, 1);
-      return;
-    }
-    if (solved.current.has(questionId)) return;
+    if (result.answerRank !== 1 || solved.current.has(questionId)) return;
     solved.current.add(questionId);
     onScore(solved.current.size);
-    onTurn(1, 0);
-  }, [result, lang, size, overlap, questionId, onScore, onTurn]);
+  }, [result, questionId, onScore]);
 
   const verdict =
     result.answerRank === 1

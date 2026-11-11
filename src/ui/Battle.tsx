@@ -1,92 +1,167 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useI18n } from '../i18n';
-import { BATTLES, startBattle, strike, type BattleState } from '../lib/battle';
+import type { Strings } from '../i18n/strings';
+import {
+  BATTLES,
+  HERO_HP,
+  MOVE_IDS,
+  canAct,
+  heavyNext,
+  startBattle,
+  takeTurn,
+  type Action,
+  type BattleEvent,
+  type BattleState,
+} from '../lib/battle';
 import type { BattleId } from '../lib/progress';
 import { useGame } from './progress';
 import { play } from './sfx';
 import { ENEMIES, HERO, HERO_ATTACK } from './sprite-data';
 import { Avatar, Sprite } from './sprites';
 
-/** What a game reports after each move: right answers and wrong ones. */
-export type Turn = (hits: number, misses: number) => void;
+const HERO_SIZE = 64;
+/** How long each step of a turn stays on screen. */
+const BEAT_MS = 1150;
 
 interface Fight {
   state: BattleState;
-  /** The last move that counted, numbered so its animation can replay. */
-  last: { hits: number; misses: number; n: number } | null;
+  /** The steps of the turn being shown, and which one is on screen. */
+  beats: BattleEvent[];
+  index: number;
 }
 
-const HERO_SIZE = 52;
-
-const startFight = (id: BattleId): Fight => ({ state: startBattle(id), last: null });
+const startFight = (id: BattleId): Fight => ({ state: startBattle(id), beats: [], index: 0 });
 
 function Hp({ value, max, label }: { value: number; max: number; label: string }) {
+  const ratio = value / max;
   return (
-    <span className="hp" role="img" aria-label={`${label} ${value}/${max}`}>
-      {Array.from({ length: max }, (_, i) => (
-        <i key={i} className={i < value ? 'on' : ''} />
-      ))}
+    <span className="hpbar" role="img" aria-label={`${label} ${value}/${max}`}>
+      <i
+        className={ratio > 0.5 ? '' : ratio > 0.2 ? 'mid' : 'low'}
+        style={{ width: `${ratio * 100}%` }}
+      />
     </span>
   );
+}
+
+/** One line for the message box. */
+function describe(event: BattleEvent, id: BattleId, t: Strings): string {
+  const b = t.battle;
+  const name = t.enemies[id];
+  switch (event.kind) {
+    case 'move': {
+      const used = b.uses(b.moves[event.move]);
+      if (event.effect === 'weak') return `${used} ${b.weak} ${b.why[event.move]}`;
+      if (event.effect === 'resist') return `${used} ${b.resist}`;
+      return event.stale ? `${used} ${b.stale}` : used;
+    }
+    case 'guard':
+      return b.guards;
+    case 'tea':
+      return b.tea(event.heal);
+    case 'enemy': {
+      const attack = b.enemyUses(name, b.enemyMoves[id][event.heavy ? 'heavy' : 'normal']);
+      return event.guarded ? `${attack} ${b.blocked}` : attack;
+    }
+    case 'counter':
+      return b.counter;
+    case 'charge':
+      return b.charge(name);
+    case 'end':
+      return event.won ? b.falls(name) : b.lost;
+  }
 }
 
 interface Props {
   id: BattleId;
   onExit: () => void;
   onHero: () => void;
-  children: (onTurn: Turn) => ReactNode;
 }
 
-/** Wraps a game as a turn-based fight: the game is the hero's move. */
-export function Battle({ id, onExit, onHero, children }: Props) {
+/** A turn-based fight in the dojo: pick a technique, guard, drink tea or leave. */
+export function Battle({ id, onExit, onHero }: Props) {
   const { t } = useI18n();
   const { gain } = useGame();
+  const [{ state, beats, index }, setFight] = useState(() => startFight(id));
+  const [picking, setPicking] = useState(false);
   const [attempt, setAttempt] = useState(0);
-  const [{ state, last }, setFight] = useState(() => startFight(id));
+  const mounted = useRef(false);
+  const menu = useRef<HTMLDivElement>(null);
   const outcome = useRef<HTMLDivElement>(null);
   const name = t.enemies[id];
 
-  const onTurn = useCallback<Turn>((hits, misses) => {
-    if (hits === 0 && misses === 0) return;
-    // Once the fight is decided, nothing a game reports counts any more.
-    setFight((fight) =>
-      fight.state.status !== 'fight'
-        ? fight
-        : {
-            state: strike(fight.state, hits, misses),
-            last: { hits, misses, n: (fight.last?.n ?? 0) + 1 },
-          },
-    );
-  }, []);
+  const beat = beats[index];
+  const playing = beat !== undefined;
+  const over = !playing && state.status !== 'fight';
+  const hp = beat ?? state;
+  const opening = state.turn === 0 && state.last === null && beats.length === 0;
 
+  // Show the turn one step at a time.
   useEffect(() => {
-    if (last) play(last.hits > 0 ? 'hit' : 'hurt');
-  }, [last]);
+    if (!beat) return;
+    if (beat.kind === 'move' || beat.kind === 'counter') play('hit');
+    else if (beat.kind === 'enemy' && beat.damage > 0) play('hurt');
+    else if (beat.kind === 'tea') play('xp');
+    const timer = setTimeout(() => setFight((f) => ({ ...f, index: f.index + 1 })), BEAT_MS);
+    return () => clearTimeout(timer);
+  }, [beat]);
 
+  // Hand the keyboard back once the turn has played out.
   useEffect(() => {
-    if (state.status === 'fight') return;
+    if (playing || opening) return;
+    if (state.status === 'fight') {
+      menu.current?.querySelector('button')?.focus();
+      return;
+    }
     if (state.status === 'won') gain({ type: 'win', id });
     play(state.status === 'won' ? 'win' : 'lose');
-    // The game's own buttons have just been disabled; keep keyboard users in the fight.
     outcome.current?.querySelector('button')?.focus();
-  }, [state.status, id, gain]);
+  }, [playing, opening, state.status, id, gain]);
 
-  const retry = () => {
-    setAttempt((a) => a + 1);
-    setFight(startFight(id));
+  // Opening or closing the list of techniques, or starting over, swaps the buttons:
+  // keep the keyboard on the menu instead of losing it.
+  useEffect(() => {
+    if (mounted.current) menu.current?.querySelector('button')?.focus();
+    mounted.current = true;
+  }, [picking, attempt]);
+
+  const act = (action: Action) => {
+    setPicking(false);
+    setFight((fight) => {
+      if (fight.index < fight.beats.length) return fight;
+      const turn = takeTurn(fight.state, action, Math.random);
+      return turn.events.length > 0 ? { state: turn.state, beats: turn.events, index: 0 } : fight;
+    });
   };
 
-  const heroHurt = last !== null && last.misses > 0 && state.status !== 'won';
-  const heroStrikes = last !== null && last.hits > 0;
-  let log = t.battle.appears(name);
-  if (last) {
-    log = [
-      last.hits > 0 ? t.battle.hit(last.hits) : '',
-      heroHurt ? t.battle.hurt(name, last.misses) : '',
-    ]
-      .filter(Boolean)
-      .join(' ');
-  }
+  const retry = () => {
+    setPicking(false);
+    setFight(startFight(id));
+    setAttempt((n) => n + 1);
+  };
+
+  const heroStrikes = beat?.kind === 'move' || beat?.kind === 'counter';
+  const heroClass = [
+    heroStrikes ? 'attack' : '',
+    beat?.kind === 'enemy' && beat.damage > 0 ? 'hurt' : '',
+    beat?.kind === 'tea' ? 'heal' : '',
+    beat?.kind === 'guard' || (beat?.kind === 'enemy' && beat.guarded) ? 'guard' : '',
+  ].join(' ');
+  // The enemy glows while it gathers strength, so the heavy blow is never a surprise.
+  const charging = !playing && state.status === 'fight' && heavyNext(state);
+  const foeClass = heroStrikes
+    ? 'hurt'
+    : beat?.kind === 'enemy'
+      ? 'foe-attack'
+      : beat?.kind === 'charge' || charging
+        ? 'charge'
+        : '';
+
+  let message = t.battle.prompt;
+  if (beat) message = describe(beat, id, t);
+  else if (over) message = state.status === 'won' ? t.battle.falls(name) : t.battle.lost;
+  else if (opening) message = t.battle.appears(name);
+  else if (charging) message = t.battle.charge(name);
 
   return (
     <section className="battle">
@@ -94,12 +169,18 @@ export function Battle({ id, onExit, onHero, children }: Props) {
         ◀ {t.battle.back}
       </button>
 
-      <div className={`arena ${state.status}`}>
-        <div className="fighter hero">
-          <span
-            key={last?.n}
-            className={`${heroStrikes ? 'attack' : ''} ${heroHurt ? 'hurt' : ''}`}
-          >
+      <div className={`dojo ${over ? state.status : ''}`}>
+        <div className="plate foe-plate">
+          <b>{name}</b>
+          <Hp value={hp.enemy} max={BATTLES[id].hp} label={t.battle.hp} />
+        </div>
+        <div className="foe">
+          <span key={index} className={foeClass}>
+            <Sprite data={ENEMIES[id]} size={id === 'boss' ? 104 : 80} />
+          </span>
+        </div>
+        <div className="samurai">
+          <span key={index} className={heroClass}>
             <Avatar size={HERO_SIZE} />
             {heroStrikes && (
               <Sprite
@@ -109,27 +190,75 @@ export function Battle({ id, onExit, onHero, children }: Props) {
               />
             )}
           </span>
-          <b>{t.tabs.hero}</b>
-          <Hp value={state.hero} max={BATTLES[id].hero} label={t.battle.hp} />
         </div>
-        <span className="vs" aria-hidden>
-          VS
-        </span>
-        <div className="fighter enemy">
-          <span key={last?.n} className={last && last.hits > 0 ? 'hurt' : ''}>
-            <Sprite data={ENEMIES[id]} size={id === 'boss' ? 84 : 60} />
-          </span>
-          <b>{name}</b>
-          <Hp value={state.enemy} max={BATTLES[id].enemy} label={t.battle.hp} />
+        <div className="plate hero-plate">
+          <b>{t.tabs.hero}</b>
+          <Hp value={hp.hero} max={HERO_HP} label={t.battle.hp} />
+          <small className="num">
+            {hp.hero}/{HERO_HP}
+          </small>
         </div>
       </div>
 
       <p className="battle-log" aria-live="polite">
-        {log}
+        {message}
       </p>
 
+      {!over && (
+        <div ref={menu} className="battle-menu" role="group" aria-label={t.battle.prompt}>
+          {picking ? (
+            <>
+              {MOVE_IDS.map((move) => (
+                <button
+                  type="button"
+                  key={move}
+                  className="btn"
+                  disabled={playing}
+                  onClick={() => act({ type: 'move', move })}
+                >
+                  {t.battle.moves[move]}
+                </button>
+              ))}
+              <button type="button" className="btn small wide" onClick={() => setPicking(false)}>
+                ◀ {t.battle.cancel}
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                className="btn primary"
+                disabled={playing}
+                onClick={() => setPicking(true)}
+              >
+                {t.battle.fight}
+              </button>
+              <button
+                type="button"
+                className="btn"
+                disabled={playing}
+                onClick={() => act({ type: 'guard' })}
+              >
+                {t.battle.guard}
+              </button>
+              <button
+                type="button"
+                className="btn"
+                disabled={playing || !canAct(state, { type: 'tea' })}
+                onClick={() => act({ type: 'tea' })}
+              >
+                {t.battle.teaItem} ×{state.teas}
+              </button>
+              <button type="button" className="btn" disabled={playing} onClick={onExit}>
+                {t.battle.run}
+              </button>
+            </>
+          )}
+        </div>
+      )}
+
       <div ref={outcome} role="status">
-        {state.status === 'won' && (
+        {over && state.status === 'won' && (
           <div className="outcome won">
             <strong>{t.battle.won}</strong>
             <span>
@@ -148,7 +277,7 @@ export function Battle({ id, onExit, onHero, children }: Props) {
             </div>
           </div>
         )}
-        {state.status === 'lost' && (
+        {over && state.status === 'lost' && (
           <div className="outcome lost">
             <strong>{t.battle.lost}</strong>
             <div className="row">
@@ -159,11 +288,6 @@ export function Battle({ id, onExit, onHero, children }: Props) {
           </div>
         )}
       </div>
-
-      {/* A disabled fieldset freezes the game once the fight is over, with the last move on show. */}
-      <fieldset key={attempt} className="battle-field" disabled={state.status !== 'fight'}>
-        {children(onTurn)}
-      </fieldset>
     </section>
   );
 }

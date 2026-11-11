@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { projects } from '../../content/projects';
 import { LANGUAGE_REPOS, languages } from '../../content/skills';
-import { BossFight } from '../games/BossFight';
 import { ChunkingLab } from '../games/ChunkingLab';
 import { CloserFarther } from '../games/CloserFarther';
 import { RetrieverGame } from '../games/RetrieverGame';
@@ -17,10 +16,13 @@ import { Avatar, Sprite } from './sprites';
 
 const BATTLE_IDS: BattleId[] = ['retriever', 'chunking', 'closer', 'boss'];
 
+const TRIAL_IDS: TrialId[] = ['retriever', 'chunking', 'closer'];
+
 export function Trials({ onHero }: { onHero: () => void }) {
   const { t } = useI18n();
   const { progress, gain } = useGame();
-  const [open, setOpen] = useState<BattleId | null>(null);
+  const [battle, setBattle] = useState<BattleId | null>(null);
+  const [training, setTraining] = useState<TrialId | null>(null);
   const onScore = useCallback(
     (id: TrialId) => (score: number) => gain({ type: 'trial', id, score }),
     [gain],
@@ -34,18 +36,19 @@ export function Trials({ onHero }: { onHero: () => void }) {
     [onScore],
   );
 
-  if (open) {
+  if (battle) return <Battle id={battle} onExit={() => setBattle(null)} onHero={onHero} />;
+
+  if (training) {
     return (
-      <Battle id={open} onExit={() => setOpen(null)} onHero={onHero}>
-        {(onTurn) => (
-          <>
-            {open === 'retriever' && <RetrieverGame onScore={scores.retriever} onTurn={onTurn} />}
-            {open === 'chunking' && <ChunkingLab onScore={scores.chunking} onTurn={onTurn} />}
-            {open === 'closer' && <CloserFarther onScore={scores.closer} onTurn={onTurn} />}
-            {open === 'boss' && <BossFight onTurn={onTurn} />}
-          </>
-        )}
-      </Battle>
+      <section>
+        <button type="button" className="btn small" onClick={() => setTraining(null)}>
+          ◀ {t.battle.back}
+        </button>
+        <h2>{t.trials.names[training]}</h2>
+        {training === 'retriever' && <RetrieverGame onScore={scores.retriever} />}
+        {training === 'chunking' && <ChunkingLab onScore={scores.chunking} />}
+        {training === 'closer' && <CloserFarther onScore={scores.closer} />}
+      </section>
     );
   }
 
@@ -58,14 +61,13 @@ export function Trials({ onHero }: { onHero: () => void }) {
         {BATTLE_IDS.map((id) => {
           const locked = id === 'boss' && !unlocked;
           const beaten = progress.wins.includes(id);
-          const reward = WIN_XP[id] + (id === 'boss' ? 0 : TRIALS[id].max * TRIALS[id].xp);
           return (
             <li key={id}>
               <button
                 type="button"
                 className={`trial-card ${id === 'boss' ? 'boss' : ''}`}
                 disabled={locked}
-                onClick={() => setOpen(id)}
+                onClick={() => setBattle(id)}
               >
                 <Sprite data={ENEMIES[id]} size={44} className={locked ? 'locked' : ''} />
                 <span>
@@ -74,21 +76,38 @@ export function Trials({ onHero }: { onHero: () => void }) {
                 </span>
                 <span className="trial-meta">
                   {beaten && <span className="tick">✓ {t.battle.beaten}</span>}
-                  {id !== 'boss' && (
-                    <span className="pips" aria-hidden>
-                      {Array.from({ length: TRIALS[id].max }, (_, n) => (
-                        <i key={n} className={n < (progress.trials[id] ?? 0) ? 'on' : ''} />
-                      ))}
-                    </span>
-                  )}
                   <small>
-                    {t.trials.reward} {reward} XP
+                    {t.trials.reward} {WIN_XP[id]} XP
                   </small>
                 </span>
               </button>
             </li>
           );
         })}
+      </ul>
+
+      <h3>{t.trials.training}</h3>
+      <small>{t.trials.trainingNote}</small>
+      <ul className="trial-list training">
+        {TRIAL_IDS.map((id) => (
+          <li key={id}>
+            <button type="button" className="trial-card" onClick={() => setTraining(id)}>
+              <span>
+                <b>{t.trials.names[id]}</b>
+              </span>
+              <span className="trial-meta">
+                <span className="pips" aria-hidden>
+                  {Array.from({ length: TRIALS[id].max }, (_, n) => (
+                    <i key={n} className={n < (progress.trials[id] ?? 0) ? 'on' : ''} />
+                  ))}
+                </span>
+                <small>
+                  {t.trials.reward} {TRIALS[id].max * TRIALS[id].xp} XP
+                </small>
+              </span>
+            </button>
+          </li>
+        ))}
       </ul>
     </section>
   );
