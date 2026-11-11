@@ -15,7 +15,7 @@ import {
 } from '../lib/battle';
 import type { BattleId } from '../lib/progress';
 import { useGame } from './progress';
-import { play } from './sfx';
+import { play, startMusic, stopMusic } from './sfx';
 import { ENEMIES, HERO, HERO_ATTACK } from './sprite-data';
 import { Avatar, Sprite } from './sprites';
 
@@ -105,6 +105,13 @@ export function Battle({ id, onExit, onHero }: Props) {
     const timer = setTimeout(() => setFight((f) => ({ ...f, index: f.index + 1 })), BEAT_MS);
     return () => clearTimeout(timer);
   }, [beat]);
+
+  // The dojo music lasts as long as the fight; the boss gets a faster one.
+  useEffect(() => {
+    if (over) return;
+    startMusic(id === 'boss');
+    return stopMusic;
+  }, [id, over]);
 
   // Hand the keyboard back once the turn has played out.
   useEffect(() => {

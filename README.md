@@ -9,7 +9,7 @@ Web personal publicada en <https://arennull.github.io>, planteada como un peque�
 - **Oráculo**: para cada pregunta se calcula en el navegador la búsqueda vectorial (coseno), la búsqueda por palabras (BM25) y su fusión por rango recíproco. Solo la redacción de la respuesta está escrita de antemano.
 - **Combates** por turnos en un dojo, sin preguntas: el samurái elige entre cuatro técnicas (cada enemigo es débil a una), ponerse en guardia, beber té o huir. Tres guardianes y un jefe final, la Alucinación. Aparte hay un **entrenamiento** opcional con tres minijuegos sobre los embeddings reales («Sé el retriever», «Chunking lab» y «Más cerca o más lejos»).
 - **Misiones**: un mapa donde cada proyecto es un lugar en pixel art con su ficha (botín, objetos y cómo se hizo). **Héroe**: ficha, stack y contacto.
-- Progreso con XP, niveles, objetivos y trofeos, guardado en el navegador. Efectos de sonido opcionales, apagados por defecto.
+- Progreso con XP, niveles, objetivos y trofeos, guardado en el navegador. Efectos de sonido y música de dojo en los combates, generados por código y apagados por defecto.
 - En tres idiomas, cada uno con su dirección: `/` (inglés), `/es/` (español) y `/jp/` (japonés). Sin backend y sin claves. Botón «Saltar al CV» para quien no quiera jugar.
 
 ## Cómo funciona
