@@ -6,32 +6,32 @@ export interface SpriteData {
   colors: Record<string, string>;
 }
 
-/** A hooded scholar. */
+/** A small samurai: horned helmet, red armour and a katana at his side. */
 export const HERO: SpriteData = {
   rows: [
-    '....hhhh....',
-    '...hhhhhh...',
-    '..hhhhhhhh..',
-    '..hssssssh..',
-    '..hsesseSh..',
-    '..hssssssh..',
-    '...hssssh...',
-    '..rrrrrrrr..',
-    '.rrrryyrrrr.',
-    '.rrrryyrrrr.',
-    '.srrrrrrrrs.',
-    '..rrrrrrrr..',
-    '..rrr..rrr..',
+    '.y........y.',
+    '.yy......yy.',
+    '..yyrrrryy..',
+    '..rrryyrrr..',
+    'rrrrrrrrrrrr',
+    '.rrssssssrr.',
+    '..rsessesr.w',
+    '...ssssss..w',
+    '..rrryyrrr.w',
+    '.rrryrryrr.w',
+    '.srrryyrrrsy',
+    '..rrrrrrrr.o',
     '..bbb..bbb..',
+    '..ooo..ooo..',
   ],
   colors: {
-    h: '#3b5dc9',
-    s: '#ffcd75',
-    S: '#ffcd75',
-    e: '#1a1c2c',
-    r: '#29366f',
     y: '#ffcd75',
-    b: '#333c57',
+    r: '#b13e53',
+    s: '#ffcd75',
+    e: '#1a1c2c',
+    w: '#f4f4f4',
+    b: '#3b5dc9',
+    o: '#ef7d57',
   },
 };
 
