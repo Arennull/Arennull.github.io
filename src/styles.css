@@ -15,6 +15,8 @@
   --px: 3px;
   --pixel: 'Pixelify Sans Variable', ui-monospace, monospace;
   --mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+  /* How much the interface is enlarged on big screens; the 3D brain just gets more room. */
+  --ui: 1;
   color-scheme: dark;
 }
 
@@ -222,7 +224,7 @@ button:disabled {
 .screen {
   height: 100%;
   display: grid;
-  grid-template-columns: 210px minmax(0, 1fr);
+  grid-template-columns: calc(210px * var(--ui)) minmax(0, 1fr);
   grid-template-rows: auto minmax(0, 1fr) auto;
   gap: 12px;
   padding: 12px;
@@ -1779,6 +1781,108 @@ details p {
 
   .stats li {
     grid-template-columns: 110px 1fr auto;
+  }
+
+  /* Everything a finger has to hit is at least 40px tall. */
+  .screen button,
+  .screen .btn,
+  .cv .btn,
+  .screen summary {
+    min-height: 40px;
+  }
+
+  .screen a.btn,
+  .cv a.btn {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .lang button {
+    min-width: 40px;
+  }
+
+  /* Long labels wrap instead of pushing the page sideways. */
+  .btn {
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .battle-menu .btn,
+  .trial-card,
+  .trial-card > span {
+    min-width: 0;
+  }
+
+  .trial-card {
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    padding: 10px;
+  }
+
+  .trial-card > span:not(.trial-meta) {
+    flex: 1;
+  }
+
+  .brain-stage {
+    min-height: 220px;
+  }
+
+  .cv > div {
+    padding: 16px 14px;
+  }
+}
+
+/* Small phones: the dojo tightens up and the bottom menu keeps one line per tab. */
+@media (max-width: 480px) {
+  .dojo::before {
+    display: none;
+  }
+
+  .plate {
+    width: 48%;
+    min-width: 0;
+    padding: 4px 6px 5px;
+  }
+
+  .foe {
+    right: 6%;
+  }
+
+  .samurai {
+    left: 6%;
+  }
+
+  .menu button {
+    padding: 14px 0;
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+}
+
+/* Big screens: the interface grows so it does not look lost in a corner. */
+@media (min-width: 1700px) and (min-height: 940px) {
+  :root {
+    --ui: 1.25;
+  }
+}
+
+@media (min-width: 2300px) and (min-height: 1250px) {
+  :root {
+    --ui: 1.6;
+  }
+}
+
+@media (min-width: 901px) {
+  .hud,
+  .side,
+  .panel,
+  .dialogue,
+  .title,
+  .toasts,
+  .keys-hint,
+  .cv {
+    zoom: var(--ui);
   }
 }
 
