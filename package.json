@@ -29,7 +29,7 @@
   },
   "devDependencies": {
     "@emnapi/core": "2.0.0-beta.2",
-    "@emnapi/runtime": "2.0.0-beta.2",
+    "@emnapi/runtime": "2.0.0-beta.3",
     "@eslint/js": "^10.0.1",
     "@huggingface/transformers": "^4.3.2",
     "@types/node": "^26.6.6",
