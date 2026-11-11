@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react';
 import { useReducedMotion, useTyped } from '../hooks';
 import { useI18n } from '../i18n';
+import { LANG_LABEL } from '../i18n/routes';
 import { CLUSTER_COLORS, CONTACT, type Tab } from '../i18n/strings';
 import { EXPLORE_GOAL, levelOf, objectivesOf } from '../lib/progress';
-import { CLUSTERS, type Cluster } from '../lib/types';
+import { CLUSTERS, LANGS, type Cluster } from '../lib/types';
 import { useGame } from './progress';
 import { useSound } from './sfx';
 import { Avatar } from './sprites';
@@ -55,8 +56,8 @@ export function Hud({ onSkip }: { onSkip: () => void }) {
         >
           ♪
         </button>
-        <div className="lang" role="group" aria-label="Language">
-          {(['en', 'es'] as const).map((code) => (
+        <div className="lang" role="group" aria-label={t.title.language}>
+          {LANGS.map((code) => (
             <button
               type="button"
               key={code}
@@ -64,7 +65,7 @@ export function Hud({ onSkip }: { onSkip: () => void }) {
               aria-pressed={code === lang}
               onClick={() => setLang(code)}
             >
-              {code.toUpperCase()}
+              {LANG_LABEL[code]}
             </button>
           ))}
         </div>

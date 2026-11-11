@@ -11,19 +11,39 @@ const STOPWORDS = new Set(
 
 const STEM_LENGTH = 5;
 
+const KATAKANA = /[ァ-ヺー]{2,}/g;
+const KANJI = /[㐀-鿿々]+/g;
+
+/**
+ * Japanese has no spaces, so its words cannot be split the way Latin ones are.
+ * Katakana runs are loanwords and count whole; kanji runs become overlapping
+ * pairs, the usual trick when there is no dictionary. Hiragana is mostly
+ * grammar and is left out, which does the job of a stopword list.
+ */
+function tokenizeJapanese(text: string): string[] {
+  const katakana = text.match(KATAKANA) ?? [];
+  const kanji = (text.match(KANJI) ?? []).flatMap((run) =>
+    run.length === 1
+      ? [run]
+      : Array.from({ length: run.length - 1 }, (_, i) => run.slice(i, i + 2)),
+  );
+  return [...katakana, ...kanji];
+}
+
 /**
  * Lower-cases, strips accents, drops stopwords and cuts every word to a short
  * prefix. Prefix stemming is crude, but it makes "evaluate", "evaluation" and
  * "evalúas" meet without a language-specific stemmer.
  */
 export function tokenize(text: string): string[] {
-  return text
-    .toLowerCase()
+  const lower = text.toLowerCase();
+  const latin = lower
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
     .split(/[^a-z0-9@]+/)
     .filter((t) => t.length > 1 && !STOPWORDS.has(t))
     .map((t) => t.slice(0, STEM_LENGTH));
+  return [...latin, ...tokenizeJapanese(lower.normalize('NFKC'))];
 }
 
 export interface LexicalIndex<T> {

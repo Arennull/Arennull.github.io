@@ -1,4 +1,4 @@
-import type { L10n } from '../src/lib/types';
+import type { L10n, Lang } from '../src/lib/types';
 
 export interface Project {
   id: string;
@@ -8,7 +8,7 @@ export interface Project {
   featured: boolean;
   tagline: L10n;
   summary: L10n;
-  points: Record<'en' | 'es', string[]>;
+  points: Record<Lang, string[]>;
   metrics: { value: string; label: L10n }[];
   stack: string[];
   url?: string;
@@ -24,10 +24,12 @@ export const projects: Project[] = [
     tagline: {
       en: 'RAG chat over a curated archive of designer footwear',
       es: 'Chat RAG sobre un archivo curado de calzado de diseñador',
+      ja: 'デザイナーシューズの厳選アーカイブを対象にしたRAGチャット',
     },
     summary: {
       en: 'An editorial archive where visitors ask in plain language and get answers grounded in the catalogue and the magazine. Built with the team at The AI Business.',
       es: 'Un archivo editorial donde el visitante pregunta en lenguaje natural y recibe respuestas fundamentadas en el catálogo y la revista. Construido con el equipo de The AI Business.',
+      ja: 'ユーザーが自然な言葉で質問すると、カタログと雑誌に基づいた回答が返る編集アーカイブ。The AI Businessのチームと共同で構築しました。',
     },
     points: {
       en: [
@@ -42,15 +44,32 @@ export const projects: Project[] = [
         'Puertas deterministas de afirmaciones y de evidencia fuera del modelo, añadidas tras una auditoría que encontró afirmaciones sin respaldo en 26 de 36 respuestas reales.',
         'Evaluación con 103 casos y una parte de reserva. Se probó un reranker y se descartó con los números en la mano.',
       ],
+      ja: [
+        'ハイブリッド検索: HNSWインデックスを使ったpgvectorでのベクトル検索とキーワード検索を、希少性ボーナス付きの逆順位融合で統合。',
+        '差分取り込み: チャンクをハッシュ化し、変更があった分だけ埋め込みをやり直す。キューと定期ジョブで駆動。',
+        'モデルの外に置いた決定論的な主張ゲートと証拠ゲート。実際の回答36件中26件に裏付けのない主張が見つかった監査を受けて追加。',
+        '103ケースとホールドアウト分割で評価。リランカーを試し、数値を根拠に不採用。',
+      ],
     },
     metrics: [
-      { value: '0.73', label: { en: 'MRR on held-out cases', es: 'MRR en casos de reserva' } },
-      { value: '103', label: { en: 'evaluation cases', es: 'casos de evaluación' } },
+      {
+        value: '0.73',
+        label: {
+          en: 'MRR on held-out cases',
+          es: 'MRR en casos de reserva',
+          ja: 'ホールドアウトケースでのMRR',
+        },
+      },
+      {
+        value: '103',
+        label: { en: 'evaluation cases', es: 'casos de evaluación', ja: '評価ケース' },
+      },
       {
         value: '−4.8 s',
         label: {
           en: 'latency saved by rejecting the reranker',
           es: 'latencia ahorrada al descartar el reranker',
+          ja: 'リランカー不採用で短縮したレイテンシ',
         },
       },
     ],
@@ -65,10 +84,12 @@ export const projects: Project[] = [
     tagline: {
       en: 'An AI coach that answers in the voice of the real one',
       es: 'Un coach de IA que responde con la voz del coach real',
+      ja: '本物のコーチの声で答えるAIコーチ',
     },
     summary: {
       en: 'An online coaching platform where clients chat, by text and voice, with an assistant that carries the personality and criteria of the coach. Built with the team at The AI Business.',
       es: 'Una plataforma de coaching online donde los clientes hablan, por texto y voz, con un asistente que lleva la personalidad y el criterio del coach. Construido con el equipo de The AI Business.',
+      ja: 'クライアントがテキストと音声で、コーチの人柄と判断基準を備えたアシスタントとチャットできるオンラインコーチングプラットフォーム。The AI Businessのチームと共同で構築しました。',
     },
     points: {
       en: [
@@ -83,6 +104,12 @@ export const projects: Project[] = [
         'Los casos de decisión revisados por el coach se ordenan e inyectan, para que el asistente siga su criterio y no consejos genéricos.',
         'Filtros de entrada y de salida en código, coste y latencia registrados por llamada, y evaluación A/B a ciegas con un modelo como juez.',
       ],
+      ja: [
+        'pgvectorのナレッジベース。起動時に、保存済みのベクトルとクエリ用モデルが一致しているかを確認。',
+        '長期記憶: クライアントごとの持続的な事実を抽出し、重複を除いて、関連するときに呼び出す。',
+        'コーチがレビューした判断事例を順位付けして注入し、一般的なアドバイスではなくコーチの基準にアシスタントが従うようにする。',
+        '入力・出力フィルタをコードで実装し、呼び出しごとにコストとレイテンシを記録。モデルを審査役にしたブラインドA/B評価も実施。',
+      ],
     },
     metrics: [
       {
@@ -90,6 +117,7 @@ export const projects: Project[] = [
         label: {
           en: 'of blind tests: judge took the AI for the coach',
           es: 'de las pruebas a ciegas: el juez tomó a la IA por el coach',
+          ja: 'ブラインドテストのうち、審査役がAIをコーチと判断した割合',
         },
       },
       {
@@ -97,9 +125,10 @@ export const projects: Project[] = [
         label: {
           en: 'false positives of the output filter',
           es: 'falsos positivos del filtro de salida',
+          ja: '出力フィルタの誤検知',
         },
       },
-      { value: '1.7 s', label: { en: 'p95 latency', es: 'latencia p95' } },
+      { value: '1.7 s', label: { en: 'p95 latency', es: 'latencia p95', ja: 'p95レイテンシ' } },
     ],
     stack: ['Express', 'Prisma', 'pgvector', 'WebSockets', 'React', 'TanStack', 'Railway'],
     neuron: 'proj-jairo',
@@ -108,12 +137,17 @@ export const projects: Project[] = [
     id: 'market-movers',
     name: 'Market Movers',
     featured: false,
-    tagline: { en: 'AI features inside a B2B CRM', es: 'Funciones de IA dentro de un CRM B2B' },
+    tagline: {
+      en: 'AI features inside a B2B CRM',
+      es: 'Funciones de IA dentro de un CRM B2B',
+      ja: 'B2B CRMに組み込んだAI機能',
+    },
     summary: {
       en: 'Meeting briefs where every statement cites its source, cached by a hash of the deal context; structured outputs; token, cost and latency telemetry on every AI call.',
       es: 'Briefs de reunión donde cada afirmación cita su fuente, cacheados por un hash del contexto del negocio; salidas estructuradas; telemetría de tokens, coste y latencia en cada llamada de IA.',
+      ja: 'すべての記述が出典を示す商談ブリーフ。商談コンテキストのハッシュでキャッシュ。構造化出力。すべてのAI呼び出しでトークン、コスト、レイテンシのテレメトリを取得。',
     },
-    points: { en: [], es: [] },
+    points: { en: [], es: [], ja: [] },
     metrics: [],
     stack: ['Next.js', 'tRPC', 'Supabase', 'Structured Outputs'],
     neuron: 'proj-market',
@@ -125,12 +159,14 @@ export const projects: Project[] = [
     tagline: {
       en: 'After-school sports platform for schools and families',
       es: 'Plataforma de actividades extraescolares para colegios y familias',
+      ja: '学校と家庭向けの放課後スポーツプラットフォーム',
     },
     summary: {
       en: 'Enrolments, instalment payments and a family portal. Role-based permissions with automatic scoping, HMAC-signed links and a waiting list with automatic promotion.',
       es: 'Inscripciones, pagos por cuotas y portal de familias. Permisos por rol con filtrado automático por alcance, enlaces firmados con HMAC y lista de espera con promoción automática.',
+      ja: '入会申込、分割払い、家庭向けポータル。範囲に応じて自動で絞り込むロールベースの権限、HMAC署名付きリンク、自動繰り上げ付きのキャンセル待ちリスト。',
     },
-    points: { en: [], es: [] },
+    points: { en: [], es: [], ja: [] },
     metrics: [],
     stack: ['NestJS', 'Prisma', 'PostgreSQL', 'React', 'Docker'],
     url: 'https://www.proyectasport.com',
@@ -140,12 +176,17 @@ export const projects: Project[] = [
     id: 'catalyst',
     name: 'Catalyst',
     featured: false,
-    tagline: { en: 'HR and timesheet platform', es: 'Plataforma de RR. HH. y partes de horas' },
+    tagline: {
+      en: 'HR and timesheet platform',
+      es: 'Plataforma de RR. HH. y partes de horas',
+      ja: '人事・タイムシート管理プラットフォーム',
+    },
     summary: {
       en: 'A monorepo with shared Zod contracts between web and API, weekly timesheets with optimistic concurrency, and time detected in Linear turned into billable hours.',
       es: 'Un monorepo con contratos Zod compartidos entre web y API, partes semanales con concurrencia optimista y tiempo detectado en Linear convertido en horas imputables.',
+      ja: 'WebとAPIの間でZodのスキーマ契約を共有するモノレポ。楽観的並行制御による週次タイムシート。Linearで検出した時間を請求可能時間に変換。',
     },
-    points: { en: [], es: [] },
+    points: { en: [], es: [], ja: [] },
     metrics: [],
     stack: ['Turborepo', 'Next.js', 'Express', 'Prisma', 'Zod'],
     neuron: 'proj-platforms',
@@ -154,12 +195,17 @@ export const projects: Project[] = [
     id: 'private-equity',
     name: 'Private Equity Club',
     featured: false,
-    tagline: { en: 'Real-estate investment ERP', es: 'ERP de inversión inmobiliaria' },
+    tagline: {
+      en: 'Real-estate investment ERP',
+      es: 'ERP de inversión inmobiliaria',
+      ja: '不動産投資ERP',
+    },
     summary: {
       en: 'Companies, projects, investors, returns, signatures and KYC in one system, with a configurable automation builder and integrations for invoicing and identity checks.',
       es: 'Sociedades, proyectos, inversores, retornos, firmas y KYC en un solo sistema, con un constructor de automatizaciones configurable e integraciones de facturación y verificación de identidad.',
+      ja: '法人、プロジェクト、投資家、リターン、署名、KYCを1つのシステムに集約。設定可能な自動化ビルダーと、請求書発行・本人確認との連携を備える。',
     },
-    points: { en: [], es: [] },
+    points: { en: [], es: [], ja: [] },
     metrics: [],
     stack: ['Next.js', 'tRPC', 'Prisma', 'PostgreSQL'],
     neuron: 'proj-platforms',
@@ -169,17 +215,33 @@ export const projects: Project[] = [
     name: 'Abacus',
     codename: true,
     featured: false,
-    tagline: { en: 'Sales and commission CRM', es: 'CRM de ventas y comisiones' },
+    tagline: {
+      en: 'Sales and commission CRM',
+      es: 'CRM de ventas y comisiones',
+      ja: '営業・コミッションCRM',
+    },
     summary: {
       en: 'An open-source CRM extended only through its supported extension points, so upstream can still be merged. The commission split is configuration, and each won deal keeps an immutable snapshot of it. Runs on a shared Postgres with its own schema, sign-in and file storage adapters.',
       es: 'Un CRM de código abierto ampliado solo por sus puntos de extensión, para poder seguir integrando la versión original. El reparto de comisiones es configuración y cada venta ganada guarda una copia inmutable. Funciona sobre un Postgres compartido con su propio esquema y adaptadores de acceso y de archivos.',
+      ja: 'オープンソースのCRMを、サポートされた拡張ポイントだけで拡張し、上流の変更を取り込み続けられるようにしました。コミッションの配分は設定で、受注した案件ごとに不変のスナップショットを保持。独自のスキーマ、サインイン、ファイルストレージのアダプタを備え、共有Postgres上で動作。',
     },
-    points: { en: [], es: [] },
+    points: { en: [], es: [], ja: [] },
     metrics: [
-      { value: '31', label: { en: 'test files of its own', es: 'archivos de test propios' } },
+      {
+        value: '31',
+        label: {
+          en: 'test files of its own',
+          es: 'archivos de test propios',
+          ja: '独自のテストファイル',
+        },
+      },
       {
         value: '0',
-        label: { en: 'upstream files modified', es: 'archivos originales modificados' },
+        label: {
+          en: 'upstream files modified',
+          es: 'archivos originales modificados',
+          ja: '変更した上流ファイル',
+        },
       },
     ],
     stack: ['PHP', 'EspoCRM', 'PostgreSQL', 'Supabase', 'Docker', 'PHPUnit'],
@@ -193,17 +255,30 @@ export const projects: Project[] = [
     tagline: {
       en: 'Website, admin panel and API for a car dealership',
       es: 'Web, panel y API para un concesionario',
+      ja: 'ディーラー向けのWebサイト、管理パネル、API',
     },
     summary: {
       en: 'A public catalogue with an interactive garage, an admin panel for stock and leads, and an API. The server writes meta tags and structured data per route from live data, so crawlers that run no JavaScript still read every car. Layered rate limits and a demo mode that works with no database.',
       es: 'Un catálogo público con garaje interactivo, un panel para stock y leads, y una API. El servidor escribe las etiquetas y los datos estructurados de cada ruta con datos reales, para que los rastreadores sin JavaScript lean cada coche. Límites de peticiones por capas y un modo demo que funciona sin base de datos.',
+      ja: 'インタラクティブなガレージを備えた公開カタログ、在庫とリード向けの管理パネル、そしてAPI。サーバーがルートごとのメタタグと構造化データを実データから出力するため、JavaScriptを実行しないクローラーにもすべての車が読み取れる。多層のレート制限と、データベースなしで動作するデモモード。',
     },
-    points: { en: [], es: [] },
+    points: { en: [], es: [], ja: [] },
     metrics: [
-      { value: '−96%', label: { en: 'hero image weight', es: 'peso de la imagen principal' } },
+      {
+        value: '−96%',
+        label: {
+          en: 'hero image weight',
+          es: 'peso de la imagen principal',
+          ja: 'メイン画像の容量',
+        },
+      },
       {
         value: '46',
-        label: { en: 'API, SEO and end-to-end tests', es: 'tests de API, SEO y e2e' },
+        label: {
+          en: 'API, SEO and end-to-end tests',
+          es: 'tests de API, SEO y e2e',
+          ja: 'API、SEO、E2Eテスト',
+        },
       },
     ],
     stack: ['Express', 'Prisma', 'Supabase', 'React', 'Vite', 'Playwright', 'Railway'],
@@ -217,18 +292,31 @@ export const projects: Project[] = [
     tagline: {
       en: 'Lead-capture site for a home staging business',
       es: 'Web de captación para un negocio de home staging',
+      ja: 'ホームステージング事業向けのリード獲得サイト',
     },
     summary: {
       en: 'A step-by-step calculator that ends in a personalised PDF report. Leads land in a shared spreadsheet guarded by two locks, one inside the process and one between instances. The page is pre-rendered so AI search engines can read and cite it.',
       es: 'Una calculadora por pasos que termina en un informe PDF personalizado. Los leads llegan a una hoja de cálculo compartida protegida por dos cerrojos, uno dentro del proceso y otro entre instancias. La página se prerrenderiza para que los buscadores de IA puedan leerla y citarla.',
+      ja: 'ステップ式の計算ツールが、パーソナライズされたPDFレポートで完結。リードは、プロセス内とインスタンス間の2つのロックで保護された共有スプレッドシートに入る。ページはプリレンダリングされ、AI検索エンジンが読み取って引用できる。',
     },
-    points: { en: [], es: [] },
+    points: { en: [], es: [], ja: [] },
     metrics: [
       {
         value: '37 → 68',
-        label: { en: 'AI-search audit score', es: 'nota en la auditoría de búsqueda con IA' },
+        label: {
+          en: 'AI-search audit score',
+          es: 'nota en la auditoría de búsqueda con IA',
+          ja: 'AI検索監査スコア',
+        },
       },
-      { value: '72', label: { en: 'test cases, run in CI', es: 'casos de test, en CI' } },
+      {
+        value: '72',
+        label: {
+          en: 'test cases, run in CI',
+          es: 'casos de test, en CI',
+          ja: 'CIで実行するテストケース',
+        },
+      },
     ],
     stack: ['React', 'Vite', 'Express', 'Google Drive API', 'SendGrid', 'Vitest', 'GitHub Actions'],
     neuron: 'proj-web-geo',
@@ -241,12 +329,14 @@ export const projects: Project[] = [
     tagline: {
       en: 'From a sales call to a written proposal',
       es: 'De una llamada comercial a una propuesta escrita',
+      ja: '営業通話から提案書まで',
     },
     summary: {
       en: 'An internal two-stage language-model pipeline. The first stage turns a call transcript into strict JSON where every proposed solution must point to a pain the client actually voiced, and anything doubtful is flagged. The second writes the proposal, which a headless browser exports as a full-page PDF.',
       es: 'Un pipeline interno de modelos de lenguaje en dos fases. La primera convierte la transcripción de una llamada en JSON estricto donde cada solución propuesta debe apuntar a un problema que el cliente dijo de verdad, y lo dudoso queda marcado. La segunda redacta la propuesta, que un navegador sin interfaz exporta como PDF a página completa.',
+      ja: '社内向けの2段階の言語モデルパイプライン。第1段階は通話の文字起こしを厳密なJSONに変換し、提案する各ソリューションは顧客が実際に口にした課題に紐づける必要があり、疑わしいものにはフラグを付ける。第2段階で提案書を作成し、ヘッドレスブラウザがフルページのPDFとして出力する。',
     },
-    points: { en: [], es: [] },
+    points: { en: [], es: [], ja: [] },
     metrics: [],
     stack: ['n8n', 'OpenAI', 'Puppeteer', 'Chrome extension', 'Express'],
     neuron: 'proj-pipeline',
@@ -259,12 +349,14 @@ export const projects: Project[] = [
     tagline: {
       en: 'Contributor to a subscription fitness app',
       es: 'Colaborador en una app de fitness por suscripción',
+      ja: 'サブスクリプション型フィットネスアプリへのコントリビューター',
     },
     summary: {
       en: 'A web and mobile product built by the team, where I shipped fixes and features in check-ins, nutrition, challenges and ranking, plus an Android release. Underneath: access scoped to the owner on the server, card payments granted only by an idempotent webhook, and an AI check-in coach behind a swappable interface.',
       es: 'Un producto web y móvil hecho por el equipo, donde entregué arreglos y funciones en check-ins, nutrición, retos y ranking, además de una versión de Android. Por debajo: acceso limitado al propietario en el servidor, pagos con tarjeta que solo concede un webhook idempotente y un coach de check-in con IA detrás de una interfaz intercambiable.',
+      ja: 'チームが開発したWebとモバイルのプロダクトで、チェックイン、栄養、チャレンジ、ランキングの修正と機能に加え、Androidリリースを担当しました。内部では、サーバー側で所有者に限定したアクセス、冪等なWebhookだけが付与するカード決済、差し替え可能なインターフェースの背後にあるAIチェックインコーチを実装。',
     },
-    points: { en: [], es: [] },
+    points: { en: [], es: [], ja: [] },
     metrics: [],
     stack: ['Bun', 'Express', 'Prisma', 'Supabase', 'React', 'Capacitor', 'OpenAI'],
     neuron: 'proj-payments',
@@ -277,12 +369,14 @@ export const projects: Project[] = [
     tagline: {
       en: 'Shop for personalised skincare routines',
       es: 'Tienda de rutinas de cuidado personalizadas',
+      ja: 'パーソナライズされたスキンケアルーティンのショップ',
     },
     summary: {
       en: 'Routine builder, card payment, a questionnaire with photos after paying, and invoices. The payment gateway is integrated by hand with signature checks, photo links are signed and expire, invoices are written atomically as PDF, and the marketing pixel waits for consent.',
       es: 'Configurador de rutina, pago con tarjeta, un cuestionario con fotos después de pagar y facturas. La pasarela de pago está integrada a mano con verificación de firma, los enlaces a las fotos van firmados y caducan, las facturas se escriben de forma atómica en PDF y el píxel de marketing espera al consentimiento.',
+      ja: 'ルーティンビルダー、カード決済、支払い後の写真付きアンケート、請求書。決済ゲートウェイは署名検証つきで手作業で統合し、写真リンクは署名付きで期限が切れ、請求書はアトミックにPDFとして書き出し、マーケティングピクセルは同意を待ってから動作。',
     },
-    points: { en: [], es: [] },
+    points: { en: [], es: [], ja: [] },
     metrics: [],
     stack: ['Next.js', 'React', 'Tailwind', 'Redsys', 'pdf-lib', 'Railway'],
     neuron: 'proj-payments',
@@ -295,16 +389,22 @@ export const projects: Project[] = [
     tagline: {
       en: 'Bilingual company website',
       es: 'Web corporativa bilingüe',
+      ja: 'バイリンガルの企業サイト',
     },
     summary: {
       en: 'A marketing site in two languages with scroll animation and video. Alternate-language links and structured data match the content, video adapts to the device, motion respects the reduced-motion setting, and every route has an end-to-end test.',
       es: 'Una web de marketing en dos idiomas con animación al hacer scroll y vídeo. Los enlaces entre idiomas y los datos estructurados coinciden con el contenido, el vídeo se adapta al dispositivo, el movimiento respeta la preferencia de reducirlo y cada ruta tiene un test de extremo a extremo.',
+      ja: 'スクロールアニメーションと動画を備えた2言語のマーケティングサイト。言語切り替え用のリンクと構造化データはコンテンツと一致し、動画はデバイスに適応、モーションは動きの軽減設定を尊重し、すべてのルートにエンドツーエンドテストがある。',
     },
-    points: { en: [], es: [] },
+    points: { en: [], es: [], ja: [] },
     metrics: [
       {
         value: '100/100',
-        label: { en: 'AI crawler access audit', es: 'auditoría de acceso de rastreadores de IA' },
+        label: {
+          en: 'AI crawler access audit',
+          es: 'auditoría de acceso de rastreadores de IA',
+          ja: 'AIクローラーアクセス監査',
+        },
       },
     ],
     stack: ['Next.js', 'next-intl', 'GSAP', 'Playwright', 'Docker'],

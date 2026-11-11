@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { CHUNK_OVERLAPS, CHUNK_SIZES } from '../../content/games';
+import { CHUNK_OVERLAPS, CHUNK_SIZES, chunkChars } from '../../content/games';
 import { useI18n } from '../i18n';
 import {
   chunkingQuestions,
@@ -99,7 +99,7 @@ export function ChunkingLab({ onScore, onTurn }: Props) {
               aria-pressed={s === size}
               onClick={() => setSize(s)}
             >
-              {s} <small>{t.chunking.chars}</small>
+              {chunkChars(lang, s)} <small>{t.chunking.chars}</small>
             </button>
           ))}
         </fieldset>

@@ -16,6 +16,7 @@ import {
   retrieve,
   SEARCH_K,
 } from './brain';
+import { LANGS } from './types';
 import { cosine } from './vector';
 
 describe('brain.json is in sync with content/', () => {
@@ -27,7 +28,7 @@ describe('brain.json is in sync with content/', () => {
   });
 
   it('has precomputed vectors for every chunking setting', () => {
-    for (const lang of ['en', 'es'] as const) {
+    for (const lang of LANGS) {
       for (const size of CHUNK_SIZES) {
         for (const overlap of CHUNK_OVERLAPS) {
           expect(labChunks(lang, size, overlap).length).toBeGreaterThan(0);
@@ -52,9 +53,7 @@ describe('brain.json is in sync with content/', () => {
 });
 
 describe('retrieval sanity', () => {
-  const cases = embeddedQueries.flatMap((q) =>
-    (['en', 'es'] as const).map((lang) => [q.query.id, lang, q] as const),
-  );
+  const cases = embeddedQueries.flatMap((q) => LANGS.map((lang) => [q.query.id, lang, q] as const));
 
   it.each(cases)('%s (%s) hands the answer the fragments it cites', (_id, lang, { query, vec }) => {
     const { vector, final } = retrieve(vec, query.question[lang], lang);

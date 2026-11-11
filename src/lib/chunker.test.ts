@@ -38,6 +38,19 @@ describe('chunkText', () => {
     expect(chunks.map((c) => c.text).join('')).toBe('abcdefghijklm');
   });
 
+  it('cuts text without spaces at the exact size and still overlaps', () => {
+    const text = 'あいうえおかきくけこ'.repeat(5);
+    const plain = chunkText(text, 20, 0);
+    expect(plain.map((c) => c.text.length)).toEqual([20, 20, 10]);
+    const overlapped = chunkText(text, 20, 0.5);
+    expect(overlapped.map((c) => c.start)).toEqual([0, 10, 20, 30]);
+  });
+
+  it('does not break at a space that belongs to a far-away word', () => {
+    const text = `Marta Oyarzun${'は'.repeat(60)}`;
+    expect(chunkText(text, 50, 0)[0]!.text).toHaveLength(50);
+  });
+
   it('rejects impossible settings', () => {
     expect(() => chunkText(text, 0, 0)).toThrow();
     expect(() => chunkText(text, 10, 1)).toThrow();
