@@ -1332,60 +1332,126 @@ details p {
 }
 
 /* ───────── Battles ───────── */
-.battle-field {
-  min-width: 0;
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-.battle-field:disabled .game {
-  opacity: 0.7;
-}
-
-.arena {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-around;
-  gap: 12px;
+/* The dojo: paper walls, a wooden floor and a scroll. The enemy waits at the back. */
+.dojo {
+  position: relative;
+  height: 264px;
   margin-top: 12px;
-  padding: 14px 10px 10px;
-  background: linear-gradient(var(--navy) 0 58%, var(--ink) 58%);
+  overflow: hidden;
   border: var(--px) solid var(--slate);
+  background:
+    linear-gradient(#3b2a22 0 12px, transparent 12px),
+    repeating-linear-gradient(90deg, #4a3328 0 4px, transparent 4px 58px),
+    repeating-linear-gradient(#4a3328 0 4px, transparent 4px 46px), #cbbb94;
 }
 
-.fighter {
+.dojo::before {
+  content: '道';
+  position: absolute;
+  top: 12px;
+  left: 55%;
   display: grid;
-  justify-items: center;
-  gap: 4px;
-  text-align: center;
+  place-items: center;
+  width: 44px;
+  height: 92px;
+  margin-left: -22px;
+  background: var(--white);
+  border: 4px solid #3b2a22;
+  border-width: 8px 4px;
+  color: var(--night);
+  font: 700 28px/1 serif;
 }
 
-.fighter > span:first-child {
+.dojo::after {
+  content: '';
+  position: absolute;
+  inset: 58% 0 0;
+  border-top: 6px solid #3b2a22;
+  background:
+    repeating-linear-gradient(90deg, #6b4630 0 3px, transparent 3px 74px),
+    linear-gradient(#9a6a47, #7d5237);
+}
+
+.foe,
+.samurai {
+  position: absolute;
+  z-index: 1;
+}
+
+.foe {
+  right: 13%;
+  bottom: 36%;
+}
+
+.samurai {
+  left: 11%;
+  bottom: 10px;
+}
+
+.foe > span,
+.samurai > span {
+  position: relative;
   display: block;
   animation: bob 1s steps(2) infinite;
+  filter: drop-shadow(0 4px 0 #1a1c2c55);
 }
 
-.fighter.enemy > span:first-child {
+.foe > span {
   animation-delay: 0.5s;
 }
 
-.fighter > .hurt:first-child {
-  animation: hurt 0.45s steps(6);
+.plate {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  gap: 3px;
+  min-width: 42%;
+  padding: 5px 9px 6px;
+  background: var(--night);
+  border: var(--px) solid var(--white);
+}
+
+.foe-plate {
+  top: 22px;
+  left: 8px;
+}
+
+.hero-plate {
+  right: 8px;
+  bottom: 8px;
+}
+
+.plate small {
+  text-align: right;
+}
+
+.hpbar {
+  display: block;
+  height: 10px;
+  background: var(--ink);
+  border: 2px solid var(--white);
+}
+
+.hpbar i {
+  display: block;
+  height: 100%;
+  background: var(--lime);
+  transition: width 0.4s steps(8);
+}
+
+.hpbar i.mid {
+  background: var(--yellow);
+}
+
+.hpbar i.low {
+  background: var(--red);
 }
 
 /* The hero steps back, lunges with the katana level and returns; then he bobs again. */
-.fighter.hero > .attack:first-child {
-  position: relative;
+.samurai > .attack {
   animation:
     lunge 0.5s steps(8),
     bob 1s steps(2) 0.5s infinite;
-}
-
-.fighter.hero > .attack.hurt:first-child {
-  animation:
-    lunge 0.5s steps(8),
-    hurt 0.45s steps(6) 0.55s;
 }
 
 .attack .avatar {
@@ -1403,14 +1469,14 @@ details p {
 @keyframes lunge {
   0%,
   100% {
-    transform: translateX(0);
+    transform: translate(0);
   }
   20% {
-    transform: translateX(-10px);
+    transform: translate(-10px, 4px);
   }
   40%,
   70% {
-    transform: translateX(80px);
+    transform: translate(84px, -38px);
   }
 }
 
@@ -1440,19 +1506,19 @@ details p {
   }
 }
 
-/* The enemy takes the cut a moment later, when the blade arrives. */
-.fighter.enemy > .hurt:first-child {
-  position: relative;
-  animation: hurt 0.45s steps(6) 0.2s;
+/* Whoever is hit shakes a moment later, when the blow lands. */
+.foe > .hurt,
+.samurai > .hurt {
+  animation: hurt 0.45s steps(6) 0.22s;
 }
 
-.fighter.enemy > .hurt:first-child::after {
+.foe > .hurt::after {
   content: '';
   position: absolute;
   inset: -6px;
   background: linear-gradient(135deg, transparent 46%, var(--white) 46% 54%, transparent 54%);
   opacity: 0;
-  animation: slash 0.3s steps(4) 0.2s;
+  animation: slash 0.3s steps(4) 0.22s;
 }
 
 @keyframes slash {
@@ -1488,36 +1554,81 @@ details p {
   }
 }
 
-.arena.won .enemy .sprite,
-.arena.lost .hero .sprite {
+.foe > .foe-attack {
+  animation: pounce 0.5s steps(8);
+}
+
+@keyframes pounce {
+  0%,
+  100% {
+    transform: translate(0);
+  }
+  20% {
+    transform: translate(8px, -6px);
+  }
+  40%,
+  70% {
+    transform: translate(-80px, 36px);
+  }
+}
+
+/* Gathering strength: the heavy blow comes next turn. */
+.foe > .charge {
+  /* The glow stays even with animations off. */
+  filter: brightness(1.25) drop-shadow(0 0 0 var(--red)) drop-shadow(0 0 6px var(--red));
+  animation: charge 0.5s steps(2) infinite;
+}
+
+@keyframes charge {
+  50% {
+    transform: scale(1.08);
+    filter: brightness(1.6) drop-shadow(0 0 0 var(--red));
+  }
+}
+
+.samurai > .guard::after {
+  content: '';
+  position: absolute;
+  inset: -8px -10px;
+  border: var(--px) solid var(--cyan);
+  background: #73eff722;
+  animation: blink 0.4s steps(2) 2;
+}
+
+.samurai > .heal {
+  animation: heal 0.9s steps(6);
+}
+
+@keyframes heal {
+  30%,
+  70% {
+    transform: translateY(-4px);
+    filter: brightness(1.5) drop-shadow(0 0 0 var(--lime));
+  }
+}
+
+.dojo.won .foe .sprite,
+.dojo.lost .samurai .sprite {
   opacity: 0.2;
 }
 
-.vs {
-  align-self: center;
-  color: var(--yellow);
-  font-size: 1.4rem;
-  font-weight: 700;
+.battle-menu {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 10px;
 }
 
-.hp {
-  display: inline-flex;
-  gap: 2px;
+.battle-menu .btn:disabled {
+  opacity: 0.45;
 }
 
-.hp i {
-  width: 12px;
-  height: 10px;
-  background: var(--night);
-  border: 2px solid var(--white);
+.battle-menu .wide {
+  grid-column: 1 / -1;
 }
 
-.hp i.on {
-  background: var(--red);
-}
-
-.hero .hp i.on {
-  background: var(--lime);
+.trial-list.training {
+  margin-top: 6px;
 }
 
 .battle-log {

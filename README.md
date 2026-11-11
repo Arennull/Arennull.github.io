@@ -7,7 +7,7 @@ Web personal publicada en <https://arennull.github.io>, planteada como un peque�
 - **Pantalla de título** con nueva partida, continuar, sonido e idioma.
 - **Mapa** (Three.js con React Three Fiber, renderizado en píxeles): corteza de partículas generada por código; cada neurona se coloca según la proyección UMAP de su embedding y empieza oculta hasta que se descubre. El héroe camina por las sinapsis con las flechas del teclado o con clics.
 - **Oráculo**: para cada pregunta se calcula en el navegador la búsqueda vectorial (coseno), la búsqueda por palabras (BM25) y su fusión por rango recíproco. Solo la redacción de la respuesta está escrita de antemano.
-- **Combates** por turnos: tres guardianes («Sé el retriever», «Chunking lab» y «Más cerca o más lejos»), donde cada acierto golpea al enemigo y cada fallo al héroe, y un jefe final, la Alucinación, al que se vence eligiendo la fuente que respalda cada respuesta.
+- **Combates** por turnos en un dojo, sin preguntas: el samurái elige entre cuatro técnicas (cada enemigo es débil a una), ponerse en guardia, beber té o huir. Tres guardianes y un jefe final, la Alucinación. Aparte hay un **entrenamiento** opcional con tres minijuegos sobre los embeddings reales («Sé el retriever», «Chunking lab» y «Más cerca o más lejos»).
 - **Misiones**: un mapa donde cada proyecto es un lugar en pixel art con su ficha (botín, objetos y cómo se hizo). **Héroe**: ficha, stack y contacto.
 - Progreso con XP, niveles, objetivos y trofeos, guardado en el navegador. Efectos de sonido opcionales, apagados por defecto.
 - En tres idiomas, cada uno con su dirección: `/` (inglés), `/es/` (español) y `/jp/` (japonés). Sin backend y sin claves. Botón «Saltar al CV» para quien no quiera jugar.
@@ -19,7 +19,7 @@ content/                 textos: fragmentos, preguntas, juegos y proyectos (en/e
 scripts/build-brain.ts   vectoriza el contenido y escribe src/data/brain.json
 src/lib/                 lógica pura con tests: vectores, BM25, RRF, troceado, progreso, combate
 src/brain/               escena 3D
-src/games/               minijuegos y jefe final
+src/games/               minijuegos de entrenamiento
 src/ui/                  título, HUD, menú, diálogo, combate, sprites y paneles del juego
 ```
 
