@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { projects } from '../../content/projects';
-import { ENEMIES, HERO, LANDMARKS } from './sprite-data';
+import { ENEMIES, HERO, HERO_ATTACK, LANDMARKS } from './sprite-data';
 
 describe('sprites', () => {
-  it.each(Object.entries({ hero: HERO, ...ENEMIES, ...LANDMARKS }))(
+  it.each(Object.entries({ hero: HERO, heroAttack: HERO_ATTACK, ...ENEMIES, ...LANDMARKS }))(
     '%s is a clean grid',
     (_, sprite) => {
       const width = sprite.rows[0]!.length;

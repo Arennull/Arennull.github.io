@@ -4,7 +4,7 @@ import { BATTLES, startBattle, strike, type BattleState } from '../lib/battle';
 import type { BattleId } from '../lib/progress';
 import { useGame } from './progress';
 import { play } from './sfx';
-import { ENEMIES } from './sprite-data';
+import { ENEMIES, HERO, HERO_ATTACK } from './sprite-data';
 import { Avatar, Sprite } from './sprites';
 
 /** What a game reports after each move: right answers and wrong ones. */
@@ -15,6 +15,8 @@ interface Fight {
   /** The last move that counted, numbered so its animation can replay. */
   last: { hits: number; misses: number; n: number } | null;
 }
+
+const HERO_SIZE = 52;
 
 const startFight = (id: BattleId): Fight => ({ state: startBattle(id), last: null });
 
@@ -75,6 +77,7 @@ export function Battle({ id, onExit, onHero, children }: Props) {
   };
 
   const heroHurt = last !== null && last.misses > 0 && state.status !== 'won';
+  const heroStrikes = last !== null && last.hits > 0;
   let log = t.battle.appears(name);
   if (last) {
     log = [
@@ -93,8 +96,18 @@ export function Battle({ id, onExit, onHero, children }: Props) {
 
       <div className={`arena ${state.status}`}>
         <div className="fighter hero">
-          <span key={last?.n} className={heroHurt ? 'hurt' : ''}>
-            <Avatar size={52} />
+          <span
+            key={last?.n}
+            className={`${heroStrikes ? 'attack' : ''} ${heroHurt ? 'hurt' : ''}`}
+          >
+            <Avatar size={HERO_SIZE} />
+            {heroStrikes && (
+              <Sprite
+                data={HERO_ATTACK}
+                size={(HERO_SIZE * HERO_ATTACK.rows[0]!.length) / HERO.rows[0]!.length}
+                className="strike"
+              />
+            )}
           </span>
           <b>{t.tabs.hero}</b>
           <Hp value={state.hero} max={BATTLES[id].hero} label={t.battle.hp} />
