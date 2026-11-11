@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { projects } from '../../content/projects';
+import { LANGUAGE_REPOS, languages } from '../../content/skills';
 import { BossFight } from '../games/BossFight';
 import { ChunkingLab } from '../games/ChunkingLab';
 import { CloserFarther } from '../games/CloserFarther';
 import { RetrieverGame } from '../games/RetrieverGame';
 import { useI18n } from '../i18n';
-import { CLUSTER_COLORS, CONTACT, STACK } from '../i18n/strings';
+import { CLUSTER_COLORS, CONTACT, PALETTE, STACK } from '../i18n/strings';
 import { neuronById, neurons } from '../lib/brain';
 import { bossUnlocked, TRIALS, WIN_XP, type BattleId, type TrialId } from '../lib/progress';
 import { CLUSTERS } from '../lib/types';
@@ -279,6 +280,27 @@ export function HeroSheet() {
         })}
       </ul>
 
+      <h3>{t.sheet.languages}</h3>
+      <ul className="stats">
+        {languages.map((l) => (
+          <li key={l.name}>
+            <span>{l.name}</span>
+            <span className="meter" aria-hidden>
+              <span
+                style={{
+                  width: `${(l.repos / LANGUAGE_REPOS) * 100}%`,
+                  background: PALETTE.yellow,
+                }}
+              />
+            </span>
+            <span className="num">
+              {l.repos}/{LANGUAGE_REPOS}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <small>{t.sheet.languagesNote(LANGUAGE_REPOS)}</small>
+
       <h3>{t.sheet.inventory}</h3>
       <ul className="items">
         {STACK.map((item) => (
@@ -352,6 +374,8 @@ export function CvDialog({ open, onClose }: { open: boolean; onClose: () => void
             </li>
           ))}
         </ul>
+        <h3>{t.sheet.languages}</h3>
+        <p>{languages.map((l) => l.name).join(' · ')}</p>
         <h3>{t.cv.stack}</h3>
         <p>{STACK.join(' · ')}</p>
         <div className="row">
