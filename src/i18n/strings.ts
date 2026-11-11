@@ -5,6 +5,7 @@ export type Tab = 'map' | 'oracle' | 'trials' | 'quests' | 'hero';
 
 const en = {
   hero: { name: 'Alejandro Tiscar', role: 'AI Engineer', guild: 'The AI Business' },
+  meta: { title: 'Alejandro Tiscar — AI Engineer · RAG, embeddings & AI brains' },
   skip: 'Skip to CV',
   title: {
     tagline: 'A portfolio you can play',
@@ -173,6 +174,7 @@ const en = {
     locate: 'Show on map',
     details: 'How it was done',
     done: 'read',
+    back: 'Quest map',
   },
   sheet: {
     class: 'Class',
@@ -204,6 +206,7 @@ export type Strings = typeof en;
 
 const es: Strings = {
   hero: { name: 'Alejandro Tiscar', role: 'AI Engineer', guild: 'The AI Business' },
+  meta: { title: 'Alejandro Tiscar — AI Engineer · RAG, embeddings y cerebros de IA' },
   skip: 'Saltar al CV',
   title: {
     tagline: 'Un portfolio que se juega',
@@ -370,6 +373,7 @@ const es: Strings = {
     locate: 'Ver en el mapa',
     details: 'Cómo se hizo',
     done: 'leída',
+    back: 'Mapa de misiones',
   },
   sheet: {
     class: 'Clase',
@@ -397,7 +401,209 @@ const es: Strings = {
   fallback: 'Aquí no hay 3D, así que este es el mapa plano.',
 };
 
-export const strings: Record<Lang, Strings> = { en, es };
+const ja: Strings = {
+  hero: { name: 'Alejandro Tiscar', role: 'AIエンジニア', guild: 'The AI Business' },
+  meta: { title: 'Alejandro Tiscar — AIエンジニア · RAG・埋め込み・AIの脳' },
+  skip: 'CVへスキップ',
+  title: {
+    tagline: '遊べるポートフォリオ',
+    start: 'はじめから',
+    confirm: 'セーブを けしますか? もういちど おす',
+    continue: 'つづきから',
+    sound: 'サウンド',
+    on: 'ON',
+    off: 'OFF',
+    language: 'ことば',
+  },
+  tabs: {
+    map: 'マップ',
+    oracle: 'オラクル',
+    trials: 'バトル',
+    quests: 'クエスト',
+    hero: 'ゆうしゃ',
+  },
+  hints: {
+    map: 'ここは わたしの脳。ひかりは どれも わたしが知っていること。意味の近さで ならんでいる。ひかりを クリックして 見つけよう。',
+    oracle: '何か きいてみよう。答えだけでなく、答えが見つかるまでが わかる。',
+    trials: '3体の守護者と ボスが 待っている。どのバトルも、検索システムを作るときの 判断だ。',
+    quests: 'わたしが作ったもの。クエストを ひらくと たからものが 見える。',
+    hero: 'これが わたし。気に入ったら、なかまに してほしい。',
+  },
+  level: 'LV',
+  ranks: [
+    'たびびと',
+    'さがす者',
+    'リトリーバー',
+    'ベクトルの使い手',
+    '知の番人',
+    'オラクルの友',
+    '大書庫の主',
+  ],
+  toast: { xp: (n) => `+${n} XP`, levelUp: (rank) => `レベルアップ! ${rank}` },
+  clusters: {
+    rag: 'RAG',
+    embeddings: '埋め込み',
+    brains: 'AIの脳',
+    eval: '評価',
+    projects: 'プロジェクト',
+    about: 'わたしについて',
+  },
+  map: {
+    regions: 'エリア',
+    unknown: '???',
+    undiscovered: 'みはっけん',
+    paths: 'ここからの みち',
+    keys: '矢印キーで いどう · ',
+    drag: 'ドラッグで かいてん · ひかりを クリック',
+  },
+  objectives: {
+    title: 'もくひょう',
+    explore: (n, goal) => `ニューロンを ${goal}個 見つける (${Math.min(n, goal)}/${goal})`,
+    ask: 'オラクルに きく',
+    battle: 'バトルに かつ',
+    quest: 'クエストを ひらく',
+    boss: 'ハルシネーションを たおす',
+    recruit: 'ゆうしゃを なかまに する',
+    reset: 'はじめから',
+  },
+  oracle: {
+    title: 'オラクルに きく',
+    sources: '出典',
+    on: '出典あり',
+    off: '記憶だけ',
+    log: {
+      embed: (dims) => `しつもん → ${dims}個の数字`,
+      search: (v, k) => `意味: ${v}件 · キーワード: ${k}件`,
+      fuse: (n) => `2つのリストを統合 → 出典${n}件`,
+    },
+    ungrounded: '出典なし。なめらかで、自信たっぷりで、でっちあげ。',
+    speaker: 'オラクル',
+    liar: 'オラクル (出典なし)',
+  },
+  battle: {
+    back: 'バトル一覧',
+    hp: 'HP',
+    appears: (name) => `${name}が あらわれた!`,
+    hit: (n) => `こうげき! −${n} HP`,
+    hurt: (name, n) => `${name}の はんげき! −${n} HP`,
+    won: 'しょうり!',
+    lost: 'ぜんめつ…',
+    retry: 'もういちど たたかう',
+    loot: 'たからもの',
+    beaten: 'たおした',
+    locked: 'まず 3体の守護者を たおそう。',
+  },
+  enemies: {
+    retriever: 'まよえるクエリ',
+    chunking: 'シュレッダー',
+    closer: 'ミミック',
+    boss: 'ハルシネーション',
+  },
+  loot: {
+    retriever: '想起のコンパス',
+    chunking: '重なりのハサミ',
+    closer: 'コサインのレンズ',
+    boss: '出典の印',
+  },
+  boss: {
+    intro: '出典なしで 答えてくる。真実を ふくむ記憶で こうげきせよ。',
+    next: 'つぎへ',
+    lesson: '答えの価値は 出典の価値で決まる。出典がなければ、答えもない。',
+    ending: 'ハルシネーションは ふういんされた。のこるは ひとつ。ゆうしゃを なかまに しよう。',
+  },
+  trials: {
+    reward: 'ほうしゅう',
+    learned: 'まなび',
+    names: {
+      retriever: 'リトリーバーになれ',
+      chunking: 'チャンキング研究所',
+      closer: 'ちかいか とおいか',
+    },
+    blurbs: {
+      retriever: '検索エンジンが 1位にするものを 当てよう。',
+      chunking: '答えを こわさずに 文章を 切ろう。',
+      closer: 'モデルは どの言葉を 近いと思う?',
+      boss: '答えの もとになった出典を さがせ。',
+    },
+  },
+  retriever: {
+    intro: '検索で 上位に来る カードを 3枚 えらぼう。',
+    round: (n, total) => `ラウンド ${n}/${total}`,
+    check: 'こたえあわせ',
+    picked: (n) => `${n}/3`,
+    next: 'つぎへ',
+    again: 'もういちど',
+    score: (hits) => `${hits}/3 せいかい`,
+    total: (hits, max) => `ごうけい ${hits}/${max}`,
+    yours: 'あなた',
+    lesson:
+      '意味で探すと、共通の言葉は 無視される。あなたの予想と ランキングの ちがいこそ、評価が 測るものだ。',
+  },
+  chunking: {
+    intro: 'もくひょう: 先頭のチャンクに 答えが ぜんぶ入ること。',
+    size: 'チャンクの大きさ',
+    chars: '文字',
+    overlap: 'オーバーラップ',
+    question: 'しつもん',
+    chunks: (n) => `${n}チャンク`,
+    top: 'ヒット',
+    hasAnswer: '答えが ぜんぶ',
+    verdictOk: 'クリア! 先頭のチャンクに 答えが ある。',
+    verdictLow: (rank) => `おしい! 答えは そろっているが ${rank}位。`,
+    verdictSplit: '答えが 2つに 切れてしまった。',
+    context: (chars) => `${chars}文字 送信`,
+    lesson:
+      '小さいチャンクは 答えを切り、大きいチャンクは ノイズを増やし、オーバーラップは 切れ目を つなぐ。ちょうどいい大きさは、テストセットだけが 教えてくれる。',
+  },
+  closer: {
+    intro: '上の言葉に ちかいのは どっち?',
+    streak: 'れんぞく',
+    best: 'ベスト',
+    right: 'せいかい!',
+    wrong: 'ミス。',
+    next: 'つぎへ',
+    lesson:
+      'モデルに 辞書は わたしていない。使われ方から、この距離を まなんだ。しかも 2つの言語を いっぺんに。',
+  },
+  quests: {
+    main: 'メインクエスト',
+    side: 'サブクエスト',
+    codename: 'コードネーム',
+    loot: 'たからもの',
+    items: 'アイテム',
+    visit: 'ひらく',
+    locate: 'マップで見る',
+    details: 'つくりかた',
+    done: '既読',
+    back: 'クエストマップ',
+  },
+  sheet: {
+    class: 'クラス',
+    guild: 'ギルド',
+    stats: 'あなたが見つけたもの',
+    inventory: 'もちもの',
+    trophies: 'トロフィー',
+    recruit: 'なかまにする',
+    github: 'GitHub',
+    quest: '検索と知識が メインクエストの パーティーを さがしています。',
+  },
+  cv: {
+    title: 'Alejandro Tiscar — AIエンジニア',
+    bullets: [
+      'RAGシステムの本番運用: pgvectorでのハイブリッド検索、順位融合、差分取り込み。',
+      '長期記憶、ペルソナ、ガードレールを備えたアシスタント。ガードレールはモデルの外で動作。',
+      '評価に基づく意思決定: ホールドアウトのテストセット、recall@k、MRR、コスト、レイテンシ。',
+    ],
+    projects: 'プロジェクト',
+    stack: 'スタック',
+    close: 'ゲームにもどる',
+  },
+  footer: '本物の埋め込み、バックエンドなし。',
+  source: 'ソース',
+  fallback: 'ここでは 3Dが使えないので、平面のマップを 表示しています。',
+};
+
+export const strings: Record<Lang, Strings> = { en, es, ja };
 
 /** Sweetie 16 palette by GrafxKid. */
 export const PALETTE = {

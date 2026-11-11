@@ -6,6 +6,22 @@ describe('tokenize', () => {
     expect(tokenize('¿Cómo evalúas la recuperación?')).toEqual(['evalu', 'recup']);
     expect(tokenize('How do you evaluate a retriever?')).toEqual(['evalu', 'retri']);
   });
+
+  it('splits Japanese without spaces: whole katakana words, kanji in pairs', () => {
+    expect(tokenize('ベクトル検索の評価')).toEqual(['ベクトル', '検索', '評価']);
+    expect(tokenize('逆順位融合でRAGを作る')).toEqual([
+      'rag',
+      '逆順',
+      '順位',
+      '位融',
+      '融合',
+      '作',
+    ]);
+  });
+
+  it('reads half-width katakana as the same word', () => {
+    expect(tokenize('ﾍﾞｸﾄﾙ')).toEqual(['ベクトル']);
+  });
 });
 
 describe('BM25', () => {

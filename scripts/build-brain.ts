@@ -12,6 +12,7 @@ import { UMAP } from 'umap-js';
 import {
   CHUNK_OVERLAPS,
   CHUNK_SIZES,
+  chunkChars,
   chunkingQuestions,
   chunkingText,
   concepts,
@@ -20,14 +21,13 @@ import { knowledge } from '../content/knowledge';
 import { queries } from '../content/queries';
 import { chunkText } from '../src/lib/chunker';
 import { seeded } from '../src/lib/random';
-import type { BrainData, Lang } from '../src/lib/types';
+import { LANGS, type BrainData, type L10n } from '../src/lib/types';
 import { cosine, encodeVec, meanVec, normalize, type Vec } from '../src/lib/vector';
 
 const MODEL = 'Xenova/paraphrase-multilingual-MiniLM-L12-v2';
 const NEIGHBOURS = 3;
 /** Half-axes of the volume the neurons are packed into (x, y, z). */
 const BRAIN_AXES = [0.6, 0.4, 0.74] as const;
-const LANGS: Lang[] = ['en', 'es'];
 
 const extractor = await pipeline('feature-extraction', MODEL, { dtype: 'q8' });
 
@@ -41,19 +41,18 @@ async function embed(texts: string[]): Promise<Vec[]> {
   return out;
 }
 
-/** One vector per item: the mean of its English and Spanish embeddings. */
-async function embedBilingual(items: { en: string; es: string }[]): Promise<Vec[]> {
-  const en = await embed(items.map((i) => i.en));
-  const es = await embed(items.map((i) => i.es));
-  return en.map((v, i) => meanVec([v, es[i]!]));
+/** One vector per item: the mean of its embeddings in every language. */
+async function embedAllLangs(items: L10n[]): Promise<Vec[]> {
+  const perLang: Vec[][] = [];
+  for (const lang of LANGS) perLang.push(await embed(items.map((i) => i[lang])));
+  return items.map((_, i) => meanVec(perLang.map((vecs) => vecs[i]!)));
 }
 
 console.log(`Embedding ${knowledge.length} fragments…`);
-const nodeVecs = await embedBilingual(
-  knowledge.map((n) => ({
-    en: `${n.title.en}. ${n.text.en}`,
-    es: `${n.title.es}. ${n.text.es}`,
-  })),
+const nodeVecs = await embedAllLangs(
+  knowledge.map(
+    (n) => Object.fromEntries(LANGS.map((l) => [l, `${n.title[l]}. ${n.text[l]}`])) as L10n,
+  ),
 );
 
 // Nearest-neighbour edges.
@@ -93,15 +92,15 @@ const positions = centred.map(
 );
 
 console.log('Embedding queries, concepts and lab chunks…');
-const queryVecs = await embedBilingual(queries.map((q) => q.question));
-const conceptVecs = await embedBilingual(concepts.map((c) => c.label));
+const queryVecs = await embedAllLangs(queries.map((q) => q.question));
+const conceptVecs = await embedAllLangs(concepts.map((c) => c.label));
 
 const chunking = {} as BrainData['chunking'];
 for (const lang of LANGS) {
   const configs = [];
   for (const size of CHUNK_SIZES) {
     for (const overlap of CHUNK_OVERLAPS) {
-      const chunks = chunkText(chunkingText[lang], size, overlap);
+      const chunks = chunkText(chunkingText[lang], chunkChars(lang, size), overlap);
       const vecs = await embed(chunks.map((c) => c.text));
       configs.push({ size, overlap, vecs: vecs.map(encodeVec) });
     }

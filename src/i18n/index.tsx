@@ -1,5 +1,14 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
 import type { Lang } from '../lib/types';
+import { langFromPath, pathForLang } from './routes';
 import { strings, type Strings } from './strings';
 
 interface I18n {
@@ -9,31 +18,30 @@ interface I18n {
 }
 
 const I18nContext = createContext<I18n | null>(null);
-const STORAGE_KEY = 'lang';
 
-function initialLang(): Lang {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved === 'en' || saved === 'es') return saved;
-  } catch {
-    // Storage can be blocked; fall through to the default.
-  }
-  return 'en';
-}
-
+/** The address decides the language: `/` is English, `/es/` Spanish, `/jp/` Japanese. */
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [lang, setLang] = useState<Lang>(initialLang);
+  const [lang, setLangState] = useState<Lang>(() => langFromPath(location.pathname));
 
   useEffect(() => {
     document.documentElement.lang = lang;
-    try {
-      localStorage.setItem(STORAGE_KEY, lang);
-    } catch {
-      // Not being able to remember the language is not worth an error.
-    }
+    document.title = strings[lang].meta.title;
   }, [lang]);
 
-  const value = useMemo(() => ({ lang, t: strings[lang], setLang }), [lang]);
+  useEffect(() => {
+    const onPop = () => setLangState(langFromPath(location.pathname));
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+
+  const setLang = useCallback((next: Lang) => {
+    if (langFromPath(location.pathname) !== next) {
+      history.pushState(null, '', pathForLang(next) + location.search + location.hash);
+    }
+    setLangState(next);
+  }, []);
+
+  const value = useMemo(() => ({ lang, t: strings[lang], setLang }), [lang, setLang]);
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }
 

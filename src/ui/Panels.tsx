@@ -11,7 +11,7 @@ import { bossUnlocked, TRIALS, WIN_XP, type BattleId, type TrialId } from '../li
 import { CLUSTERS } from '../lib/types';
 import { Battle } from './Battle';
 import { useGame } from './progress';
-import { ENEMIES } from './sprite-data';
+import { ENEMIES, LANDMARKS } from './sprite-data';
 import { Avatar, Sprite } from './sprites';
 
 const BATTLE_IDS: BattleId[] = ['retriever', 'chunking', 'closer', 'boss'];
@@ -97,90 +97,135 @@ export function Quests({ onLocate }: { onLocate: (index: number) => void }) {
   const { t, lang } = useI18n();
   const { progress, gain } = useGame();
   const [open, setOpen] = useState<string | null>(null);
+  /** Where the hero stands on the quest map: the last quest visited. */
+  const [last, setLast] = useState(projects[0]!.id);
+  const back = useRef<HTMLButtonElement>(null);
+  const map = useRef<HTMLUListElement>(null);
+  const wasOpen = useRef(false);
+  const project = projects.find((p) => p.id === open);
 
-  const toggle = (id: string) => {
-    setOpen(open === id ? null : id);
-    if (open !== id) gain({ type: 'quest', id });
+  // Keep keyboard users in place: into the card, and back to the landmark they came from.
+  useEffect(() => {
+    if (open) back.current?.focus();
+    else if (wasOpen.current) {
+      map.current?.querySelector<HTMLButtonElement>(`[data-quest="${last}"]`)?.focus();
+    }
+    wasOpen.current = open !== null;
+  }, [open, last]);
+
+  const enter = (id: string) => {
+    setOpen(id);
+    setLast(id);
+    gain({ type: 'quest', id });
   };
+
+  if (project) {
+    const p = project;
+    return (
+      <section className="quest-card" aria-labelledby="quest-title">
+        <button ref={back} type="button" className="btn small" onClick={() => setOpen(null)}>
+          ◀ {t.quests.back}
+        </button>
+        <header className={p.featured ? 'main' : ''}>
+          <span className="landmark-frame">
+            <Sprite data={LANDMARKS[p.id]!} size={72} />
+          </span>
+          <div>
+            <h2 id="quest-title">{p.name}</h2>
+            <small>
+              <span className={`star ${p.featured ? 'main' : ''}`} aria-hidden>
+                {p.featured ? '★' : '◆'}
+              </span>{' '}
+              {p.featured ? t.quests.main : t.quests.side}
+              {p.codename && ` · ${t.quests.codename}`}
+            </small>
+            <p>{p.tagline[lang]}</p>
+          </div>
+        </header>
+        {p.metrics.length > 0 && (
+          <>
+            <h3>{t.quests.loot}</h3>
+            <dl className="loot">
+              {p.metrics.map((m) => (
+                <div key={m.value}>
+                  <dt>{m.value}</dt>
+                  <dd>{m.label[lang]}</dd>
+                </div>
+              ))}
+            </dl>
+          </>
+        )}
+        <h3>{t.quests.items}</h3>
+        <ul className="items">
+          {p.stack.map((s) => (
+            <li key={s}>{s}</li>
+          ))}
+        </ul>
+        <details>
+          <summary>{t.quests.details}</summary>
+          {p.points[lang].length > 0 ? (
+            <ul className="points">
+              {p.points[lang].map((point) => (
+                <li key={point}>{point}</li>
+              ))}
+            </ul>
+          ) : (
+            <p>{p.summary[lang]}</p>
+          )}
+        </details>
+        <div className="row">
+          {p.url && (
+            <a className="btn small" href={p.url} target="_blank" rel="noreferrer">
+              {t.quests.visit} ↗
+            </a>
+          )}
+          {p.neuron && (
+            <button
+              type="button"
+              className="btn small"
+              onClick={() => onLocate(neuronById(p.neuron!).index)}
+            >
+              {t.quests.locate}
+            </button>
+          )}
+        </div>
+      </section>
+    );
+  }
+
+  const done = projects.filter((p) => progress.quests.includes(p.id)).length;
 
   return (
     <section aria-labelledby="quests-title">
-      <h2 id="quests-title">{t.tabs.quests}</h2>
-      <ul className="quests">
+      <h2 id="quests-title">
+        {t.tabs.quests}{' '}
+        <small className="num">
+          {done}/{projects.length}
+        </small>
+      </h2>
+      <ul className="quest-map" ref={map}>
         {projects.map((p) => {
-          const isOpen = open === p.id;
+          const cleared = progress.quests.includes(p.id);
           return (
-            <li key={p.id} className={isOpen ? 'open' : ''}>
+            <li key={p.id}>
               <button
                 type="button"
-                className="quest-head"
-                aria-expanded={isOpen}
-                onClick={() => toggle(p.id)}
+                data-quest={p.id}
+                className={`landmark ${p.featured ? 'main' : ''} ${cleared ? 'cleared' : ''}`}
+                onClick={() => enter(p.id)}
               >
-                <span className={`star ${p.featured ? 'main' : ''}`} aria-hidden>
-                  {p.featured ? '★' : '◆'}
+                <span className="landmark-art">
+                  <Sprite data={LANDMARKS[p.id]!} size={p.featured ? 60 : 48} />
+                  {last === p.id && <Avatar size={24} />}
                 </span>
-                <span>
-                  <b>{p.name}</b>
-                  <small>
-                    {p.featured ? t.quests.main : t.quests.side}
-                    {p.codename && ` · ${t.quests.codename}`}
-                  </small>
-                </span>
-                {progress.quests.includes(p.id) && <span className="tick">✓ {t.quests.done}</span>}
+                <b>{p.name}</b>
+                <small>
+                  <span className={`star ${p.featured ? 'main' : ''}`} aria-hidden>
+                    {p.featured ? '★' : '◆'}
+                  </span>{' '}
+                  {cleared ? `✓ ${t.quests.done}` : p.featured ? t.quests.main : t.quests.side}
+                </small>
               </button>
-              {isOpen && (
-                <div className="quest-body">
-                  <p>{p.tagline[lang]}</p>
-                  {p.metrics.length > 0 && (
-                    <>
-                      <h3>{t.quests.loot}</h3>
-                      <dl className="loot">
-                        {p.metrics.map((m) => (
-                          <div key={m.value}>
-                            <dt>{m.value}</dt>
-                            <dd>{m.label[lang]}</dd>
-                          </div>
-                        ))}
-                      </dl>
-                    </>
-                  )}
-                  <h3>{t.quests.items}</h3>
-                  <ul className="items">
-                    {p.stack.map((s) => (
-                      <li key={s}>{s}</li>
-                    ))}
-                  </ul>
-                  <details>
-                    <summary>{t.quests.details}</summary>
-                    {p.points[lang].length > 0 ? (
-                      <ul className="points">
-                        {p.points[lang].map((point) => (
-                          <li key={point}>{point}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p>{p.summary[lang]}</p>
-                    )}
-                  </details>
-                  <div className="row">
-                    {p.url && (
-                      <a className="btn small" href={p.url} target="_blank" rel="noreferrer">
-                        {t.quests.visit} ↗
-                      </a>
-                    )}
-                    {p.neuron && (
-                      <button
-                        type="button"
-                        className="btn small"
-                        onClick={() => onLocate(neuronById(p.neuron!).index)}
-                      >
-                        {t.quests.locate}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
             </li>
           );
         })}

@@ -1,8 +1,9 @@
-import { chunkingQuestions, chunkingText, concepts } from '../../content/games';
+import { chunkChars, chunkingQuestions, chunkingText, concepts } from '../../content/games';
 import { knowledge } from '../../content/knowledge';
 import { queries } from '../../content/queries';
 import raw from '../data/brain.json';
 import { chunkText, type Chunk } from './chunker';
+import { LANGS } from './types';
 import type { BrainData, Concept, KnowledgeNode, Lang, PreparedQuery } from './types';
 import { buildLexicalIndex, rrf, type LexicalIndex } from './lexical';
 import { decodeVec, rank, topK, type Scored, type Vec } from './vector';
@@ -77,7 +78,7 @@ export interface Retrieval {
 const vecOf = (n: Neuron) => n.vec;
 
 const lexicalIndexes = Object.fromEntries(
-  (['en', 'es'] as const).map((lang) => [
+  LANGS.map((lang) => [
     lang,
     buildLexicalIndex(neurons, (n) => `${n.node.title[lang]} ${n.node.text[lang]}`),
   ]),
@@ -108,7 +109,7 @@ export interface LabChunk extends Chunk {
 export function labChunks(lang: Lang, size: number, overlap: number): LabChunk[] {
   const config = data.chunking[lang].configs.find((c) => c.size === size && c.overlap === overlap);
   if (!config) throw new Error(`No precomputed chunking for size ${size}, overlap ${overlap}`);
-  const chunks = chunkText(chunkingText[lang], size, overlap);
+  const chunks = chunkText(chunkingText[lang], chunkChars(lang, size), overlap);
   if (chunks.length !== config.vecs.length) {
     throw new Error('brain.json is stale: chunk count changed. Run build:brain.');
   }

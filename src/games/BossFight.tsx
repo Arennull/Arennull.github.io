@@ -3,6 +3,7 @@ import { useI18n } from '../i18n';
 import { CLUSTER_COLORS } from '../i18n/strings';
 import { embeddedQueries, neuronById, rankNeurons, retrieve, type Neuron } from '../lib/brain';
 import { seeded, shuffle } from '../lib/random';
+import { LANGS } from '../lib/types';
 
 const DECOYS = 2;
 /** Decoys are taken from below this position in the similarity ranking. */
@@ -27,7 +28,7 @@ export function buildBossRounds(seed: number): BossRound[] {
     const truth = shuffle(query.cites, random)[0]!;
     // Nothing the retrieval would return in either language can be a decoy.
     const sources = new Set(
-      (['en', 'es'] as const).flatMap((lang) =>
+      LANGS.flatMap((lang) =>
         retrieve(vec, query.question[lang], lang).final.map((s) => s.item.node.id),
       ),
     );

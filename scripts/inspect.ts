@@ -1,8 +1,9 @@
 /** Prints, for every prepared query, where its cited fragments land. Dev aid for content edits. */
 import { embeddedQueries, retrieve } from '../src/lib/brain';
+import { LANGS } from '../src/lib/types';
 
 for (const { query, vec } of embeddedQueries) {
-  for (const lang of ['en', 'es'] as const) {
+  for (const lang of LANGS) {
     const r = retrieve(vec, query.question[lang], lang);
     const place = (list: typeof r.fused, id: string) =>
       list.findIndex((s) => s.item.node.id === id) + 1 || '-';

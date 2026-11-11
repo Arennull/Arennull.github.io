@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { CHUNK_OVERLAPS, CHUNK_SIZES, chunkingQuestions } from '../../content/games';
 import { BATTLES } from '../lib/battle';
 import { embeddedQueries, retrieve } from '../lib/brain';
+import { LANGS } from '../lib/types';
 import { seeded } from '../lib/random';
 import { buildBossRounds } from './BossFight';
 import { runLab } from './ChunkingLab';
@@ -32,7 +33,7 @@ describe('Be the retriever', () => {
 
 describe('Chunking lab', () => {
   it('ranks every chunk exactly once for every setting', () => {
-    for (const lang of ['en', 'es'] as const) {
+    for (const lang of LANGS) {
       for (const size of CHUNK_SIZES) {
         for (const overlap of CHUNK_OVERLAPS) {
           for (const q of chunkingQuestions) {
@@ -50,6 +51,25 @@ describe('Chunking lab', () => {
     const question = chunkingQuestions[1]!.id;
     expect(runLab('en', 200, 0, question).answerRank).toBe(0);
     expect(runLab('en', 200, 0.3, question).answerRank).toBe(1);
+  });
+
+  it.each(LANGS)('teaches the same lesson in %s: some size needs the overlap', (lang) => {
+    const question = chunkingQuestions[1]!.id;
+    const rescued = CHUNK_SIZES.filter(
+      (size) =>
+        runLab(lang, size, 0, question).answerRank === 0 &&
+        runLab(lang, size, 0.3, question).answerRank === 1,
+    );
+    expect(rescued.length).toBeGreaterThan(0);
+  });
+
+  it.each(LANGS)('can be won in %s: every question has a setting that finds it', (lang) => {
+    for (const q of chunkingQuestions) {
+      const ranks = CHUNK_SIZES.flatMap((size) =>
+        CHUNK_OVERLAPS.map((overlap) => runLab(lang, size, overlap, q.id).answerRank),
+      );
+      expect(ranks).toContain(1);
+    }
   });
 });
 
@@ -75,7 +95,7 @@ describe('boss fight', () => {
       expect(query.cites).toContain(round.truth);
       const decoys = round.options.filter((o) => o.node.id !== round.truth).map((o) => o.node.id);
       expect(decoys).toHaveLength(2);
-      for (const lang of ['en', 'es'] as const) {
+      for (const lang of LANGS) {
         const sources = retrieve(vec, query.question[lang], lang).final.map((s) => s.item.node.id);
         for (const decoy of decoys) expect(sources).not.toContain(decoy);
       }

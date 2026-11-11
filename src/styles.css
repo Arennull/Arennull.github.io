@@ -18,6 +18,12 @@
   color-scheme: dark;
 }
 
+/* The Japanese pixel font is heavy: only pages in Japanese ask for it. */
+:root:lang(ja) {
+  --pixel: 'Pixelify Sans Variable', 'DotGothic16', ui-monospace, monospace;
+  --mono: 'JetBrains Mono Variable', 'DotGothic16', ui-monospace, monospace;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -986,35 +992,84 @@ button:disabled {
 }
 
 /* ───────── Quests ───────── */
-.quests {
+/* Quest map: every project is a landmark on a small overworld. */
+.quest-map {
   display: grid;
-  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: 4px;
   margin-top: 14px;
-}
-
-.quests > li {
+  padding: 10px;
   border: var(--px) solid var(--slate);
-  background: var(--ink);
+  /* Grass tiles. */
+  background: repeating-conic-gradient(#1f4d4f 0 25%, #1b4447 0 50%) 0 0 / 24px 24px;
 }
 
-.quests > li.open {
-  border-color: var(--yellow);
-}
-
-.quest-head {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.landmark {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 2px;
   width: 100%;
-  padding: 8px 12px;
+  height: 126px;
+  padding: 6px 4px;
+  text-align: center;
+  border: var(--px) solid transparent;
 }
 
-.quest-head b {
-  font-size: 1.15rem;
+.landmark:hover,
+.landmark:focus-visible {
+  border-color: var(--yellow);
+  background: #1a1c2c99;
+}
+
+.landmark-art {
+  position: relative;
+  display: grid;
+  place-items: end center;
+  height: 64px;
+  filter: drop-shadow(0 3px 0 #1a1c2c88);
+}
+
+.landmark-art .avatar {
+  position: absolute;
+  right: -18px;
+  bottom: 0;
+  animation: bob 0.8s steps(2) infinite;
+}
+
+@keyframes bob {
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+h2 > .num {
+  display: inline;
+  color: var(--silver);
+}
+
+.landmark b {
+  font-size: 0.76rem;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.landmark small {
+  font-size: 0.72rem;
+  line-height: 1.1;
+  color: var(--silver);
+}
+
+.landmark.cleared small {
+  color: var(--lime);
+}
+
+.landmark .star,
+.quest-card .star {
+  font-size: inherit;
 }
 
 .star {
-  font-size: 1.3rem;
   color: var(--slate);
 }
 
@@ -1022,13 +1077,26 @@ button:disabled {
   color: var(--yellow);
 }
 
-.quest-body {
-  padding: 2px 12px 14px;
-  border-top: 2px dashed var(--slate);
+.quest-card > header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 12px;
 }
 
-.quest-body > p {
-  margin-top: 10px;
+.quest-card > header p {
+  margin-top: 4px;
+}
+
+.landmark-frame {
+  flex: none;
+  padding: 8px;
+  background: var(--night);
+  border: var(--px) solid var(--slate);
+}
+
+.quest-card > header.main .landmark-frame {
+  border-color: var(--yellow);
 }
 
 .loot {

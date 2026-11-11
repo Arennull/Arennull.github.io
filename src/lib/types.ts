@@ -1,4 +1,5 @@
-export type Lang = 'en' | 'es';
+export type Lang = 'en' | 'es' | 'ja';
+export const LANGS: Lang[] = ['en', 'es', 'ja'];
 export type L10n = Record<Lang, string>;
 
 export type Cluster = 'rag' | 'embeddings' | 'brains' | 'eval' | 'projects' | 'about';

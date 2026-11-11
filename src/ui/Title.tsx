@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { useI18n } from '../i18n';
+import { LANG_LABEL, nextLang } from '../i18n/routes';
 import { useGame } from './progress';
 import { useSound } from './sfx';
 import { Avatar } from './sprites';
@@ -48,9 +49,7 @@ export function Title({ onStart, onSkip }: { onStart: () => void; onSkip: () => 
           onStart();
         })}
         {option(`${t.title.sound}: ${sound ? t.title.on : t.title.off}`, () => setSound(!sound))}
-        {option(`${t.title.language}: ${lang.toUpperCase()}`, () =>
-          setLang(lang === 'en' ? 'es' : 'en'),
-        )}
+        {option(`${t.title.language}: ${LANG_LABEL[lang]}`, () => setLang(nextLang(lang)))}
         {option(t.skip, onSkip)}
       </div>
       <small className="title-hint">↑ ↓ Enter</small>
