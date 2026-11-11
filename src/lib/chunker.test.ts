@@ -33,6 +33,11 @@ describe('chunkText', () => {
     expect(chunkText('short text', 100, 0.25)).toEqual([{ start: 0, end: 10, text: 'short text' }]);
   });
 
+  it('loses no character when a word is longer than the chunk', () => {
+    const chunks = chunkText('abcdefghij klm', 5, 0);
+    expect(chunks.map((c) => c.text).join('')).toBe('abcdefghijklm');
+  });
+
   it('rejects impossible settings', () => {
     expect(() => chunkText(text, 0, 0)).toThrow();
     expect(() => chunkText(text, 10, 1)).toThrow();

@@ -33,9 +33,10 @@ export function useInView(ref: RefObject<Element | null>): boolean {
 
 /** Reveals `text` a few characters at a time. Returns the full text when disabled. */
 export function useTyped(text: string, enabled: boolean): string {
-  const [typed, setTyped] = useState({ text, length: enabled ? 0 : text.length });
-  // Restart when the text changes (derived state, no effect needed).
-  if (typed.text !== text) setTyped({ text, length: enabled ? 0 : text.length });
+  const [typed, setTyped] = useState({ text, enabled, length: 0 });
+  // Restart whenever the text changes or typing is switched on (derived state).
+  const current = typed.text === text && typed.enabled === enabled;
+  if (!current) setTyped({ text, enabled, length: 0 });
 
   useEffect(() => {
     if (!enabled) return;
@@ -45,5 +46,5 @@ export function useTyped(text: string, enabled: boolean): string {
     return () => window.clearInterval(id);
   }, [enabled, text]);
 
-  return enabled ? text.slice(0, typed.length) : text;
+  return enabled ? text.slice(0, current ? typed.length : 0) : text;
 }

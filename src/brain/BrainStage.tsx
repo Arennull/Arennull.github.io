@@ -54,7 +54,15 @@ function Brain2D({ lit, sources, selected, onSelect }: StageProps) {
               r={selected === i ? 0.04 : 0.026}
               fill={CLUSTER_COLORS[n.node.cluster]}
               opacity={on ? 1 : 0.2}
+              role="button"
+              tabIndex={0}
+              aria-label={n.node.title[lang]}
               onClick={() => onSelect(selected === i ? null : i)}
+              onKeyDown={(e) => {
+                if (e.key !== 'Enter' && e.key !== ' ') return;
+                e.preventDefault();
+                onSelect(selected === i ? null : i);
+              }}
             >
               <title>{n.node.title[lang]}</title>
             </circle>

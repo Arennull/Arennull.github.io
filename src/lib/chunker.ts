@@ -30,7 +30,7 @@ export function chunkText(text: string, size: number, overlap: number): Chunk[] 
     if (next >= end) next = end;
     // Move to the beginning of a word.
     const space = text.lastIndexOf(' ', next);
-    next = space > start ? space + 1 : end + 1;
+    next = space > start ? space + 1 : text[end] === ' ' ? end + 1 : end;
     start = next;
   }
   return chunks;

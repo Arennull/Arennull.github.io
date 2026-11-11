@@ -99,13 +99,12 @@ export function Lab() {
       <p className="kicker">{t.lab.kicker}</p>
       <h2 id="lab-title">{t.lab.title}</h2>
       <p className="lead">{t.lab.lead}</p>
-      <div className="tabs" role="tablist">
+      <div className="tabs">
         {t.lab.tabs.map((name, i) => (
           <button
             type="button"
-            role="tab"
             key={name}
-            aria-selected={tab === i}
+            aria-pressed={tab === i}
             className={tab === i ? 'active' : ''}
             onClick={() => setTab(i)}
           >
@@ -113,7 +112,7 @@ export function Lab() {
           </button>
         ))}
       </div>
-      <div role="tabpanel">{games[tab]}</div>
+      <div>{games[tab]}</div>
     </section>
   );
 }
@@ -257,13 +256,14 @@ export function QuickView({ open, onClose }: { open: boolean; onClose: () => voi
     <dialog
       ref={ref}
       className="quick-view"
+      aria-labelledby="quick-view-title"
       onClose={onClose}
       onClick={(e) => {
         if (e.target === ref.current) onClose();
       }}
     >
       <div>
-        <h2>{t.quickView.title}</h2>
+        <h2 id="quick-view-title">{t.quickView.title}</h2>
         <ul className="points">
           {t.quickView.bullets.map((b) => (
             <li key={b}>{b}</li>

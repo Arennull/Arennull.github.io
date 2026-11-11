@@ -158,8 +158,12 @@ function Cortex({
   );
 }
 
-function useGlowTexture(): THREE.Texture {
-  return useMemo(() => {
+let glowTexture: THREE.Texture | null = null;
+
+/** One soft radial sprite shared by every halo, created on first use. */
+function getGlowTexture(): THREE.Texture {
+  if (glowTexture) return glowTexture;
+  glowTexture = (() => {
     const canvas = document.createElement('canvas');
     canvas.width = canvas.height = 64;
     const ctx = canvas.getContext('2d');
@@ -172,7 +176,8 @@ function useGlowTexture(): THREE.Texture {
       ctx.fillRect(0, 0, 64, 64);
     }
     return new THREE.CanvasTexture(canvas);
-  }, []);
+  })();
+  return glowTexture;
 }
 
 function Neurons({
@@ -188,7 +193,7 @@ function Neurons({
   hovered: number | null;
   onHover: (index: number | null) => void;
 }) {
-  const glow = useGlowTexture();
+  const glow = getGlowTexture();
   const cores = useRef<(THREE.Mesh | null)[]>([]);
   const halos = useRef<(THREE.Sprite | null)[]>([]);
   const levels = useRef<number[]>(neurons.map(() => 0.5));
@@ -323,7 +328,7 @@ function QueryBeams({
   lit: number[];
   reducedMotion: boolean;
 }) {
-  const glow = useGlowTexture();
+  const glow = getGlowTexture();
   const start = useRef<number | null>(null);
   const targets = useMemo(() => lit.slice(0, 8), [lit]);
 

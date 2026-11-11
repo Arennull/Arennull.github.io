@@ -4,7 +4,7 @@ import { toScene } from '../brain/shape';
 import { useReducedMotion, useTyped } from '../hooks';
 import { useI18n } from '../i18n';
 import { CLUSTER_COLORS } from '../i18n/strings';
-import { dims, embeddedQueries, FINAL_K, retrieve, type Neuron } from '../lib/brain';
+import { dims, embeddedQueries, FINAL_K, rankNeurons, retrieve, type Neuron } from '../lib/brain';
 import type { Scored } from '../lib/vector';
 
 export interface BrainFocus {
@@ -65,33 +65,42 @@ export function AskMyBrain({ onFocus, onSelect }: Props) {
     [active, lang],
   );
 
-  // Advance the pipeline one step at a time.
+  // Where the query lands in the brain: between its three nearest neurons.
+  // One object per run, so the scene restarts its animation once per question.
+  const query = useMemo(() => {
+    if (!active) return null;
+    const top = rankNeurons(active.vec)
+      .slice(0, 3)
+      .map((s) => toScene(s.item.pos));
+    const origin = [0, 1, 2].map((d) => top.reduce((sum, p) => sum + p[d]!, 0) / top.length) as [
+      number,
+      number,
+      number,
+    ];
+    return { key: run, origin };
+  }, [active, run]);
+
+  const firstStep = reducedMotion ? 4 : 1;
+
+  // Advance the pipeline one step at a time. The handlers below already put it
+  // on its first step, so nothing from the previous question is ever painted.
   useEffect(() => {
-    if (!active || !retrievalOn) return;
-    if (reducedMotion) {
-      setStep(4);
-      return;
-    }
-    setStep(1);
+    if (!active || !retrievalOn || reducedMotion) return;
     const timers = STEP_DELAYS.slice(1).map((delay, i) =>
       window.setTimeout(() => setStep(i + 2), delay),
     );
     return () => timers.forEach((id) => window.clearTimeout(id));
   }, [active, run, retrievalOn, reducedMotion]);
 
+  // Turning reduced motion on mid-run jumps straight to the result.
+  if (reducedMotion && active && step !== 4) setStep(4);
+
   // Mirror the current step in the 3D brain.
   useEffect(() => {
-    if (!retrieval || !retrievalOn || step === 0) {
+    if (!retrieval || !query || !retrievalOn || step === 0) {
       onFocus(NO_FOCUS);
       return;
     }
-    const top = retrieval.vector.slice(0, 3).map((s) => toScene(s.item.pos));
-    const origin = [0, 1, 2].map((d) => top.reduce((sum, p) => sum + p[d]!, 0) / top.length) as [
-      number,
-      number,
-      number,
-    ];
-    const query = { key: run, origin };
     const indices = (list: Scored<Neuron>[]) => list.map((s) => s.item.index);
     if (step === 1) onFocus({ lit: [], sources: [], query });
     else if (step === 2) {
@@ -103,7 +112,7 @@ export function AskMyBrain({ onFocus, onSelect }: Props) {
     } else if (step === 3)
       onFocus({ lit: indices(retrieval.fused.slice(0, 8)), sources: [], query });
     else onFocus({ lit: indices(retrieval.final), sources: indices(retrieval.final), query });
-  }, [retrieval, retrievalOn, step, run, onFocus]);
+  }, [retrieval, retrievalOn, step, query, onFocus]);
 
   const answerText = active
     ? retrievalOn
@@ -116,9 +125,14 @@ export function AskMyBrain({ onFocus, onSelect }: Props) {
   const place = (list: Scored<Neuron>[], id: string) =>
     list.findIndex((s) => s.item.node.id === id) + 1;
 
+  const restart = () => {
+    setRun((r) => r + 1);
+    setStep(firstStep);
+  };
+
   const ask = (id: string) => {
     setActiveId(id);
-    setRun((r) => r + 1);
+    restart();
     onSelect(null);
     // The results render below the question list; bring them into view.
     requestAnimationFrame(() => {
@@ -133,16 +147,22 @@ export function AskMyBrain({ onFocus, onSelect }: Props) {
       <p className="lead">{t.ask.lead}</p>
 
       <div className="ask-controls">
-        <span className="mono">{t.ask.retrieval}</span>
+        <span className="mono" id="retrieval-label">
+          {t.ask.retrieval}
+        </span>
         <button
           type="button"
           role="switch"
           aria-checked={retrievalOn}
+          aria-labelledby="retrieval-label"
           className={`switch ${retrievalOn ? 'on' : ''}`}
-          onClick={() => setRetrievalOn((v) => !v)}
+          onClick={() => {
+            setRetrievalOn((v) => !v);
+            restart();
+          }}
         >
           <i />
-          <span>{retrievalOn ? t.ask.on : t.ask.off}</span>
+          <span aria-hidden>{retrievalOn ? t.ask.on : t.ask.off}</span>
         </button>
       </div>
 
@@ -251,7 +271,7 @@ export function AskMyBrain({ onFocus, onSelect }: Props) {
                   {s.item.node.title[lang]}
                 </button>
               ))}
-              <button type="button" className="ghost" onClick={() => setRun((r) => r + 1)}>
+              <button type="button" className="ghost" onClick={restart}>
                 {t.ask.replay}
               </button>
             </div>
