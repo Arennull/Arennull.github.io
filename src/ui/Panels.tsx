@@ -122,7 +122,10 @@ export function Quests({ onLocate }: { onLocate: (index: number) => void }) {
                 </span>
                 <span>
                   <b>{p.name}</b>
-                  <small>{p.featured ? t.quests.main : t.quests.side}</small>
+                  <small>
+                    {p.featured ? t.quests.main : t.quests.side}
+                    {p.codename && ` · ${t.quests.codename}`}
+                  </small>
                 </span>
                 {progress.quests.includes(p.id) && <span className="tick">✓ {t.quests.done}</span>}
               </button>

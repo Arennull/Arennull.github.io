@@ -166,6 +166,7 @@ const en = {
   quests: {
     main: 'Main quest',
     side: 'Side quest',
+    codename: 'codename',
     loot: 'Loot',
     items: 'Items',
     visit: 'Visit',
@@ -362,6 +363,7 @@ const es: Strings = {
   quests: {
     main: 'Misión principal',
     side: 'Misión secundaria',
+    codename: 'nombre en clave',
     loot: 'Botín',
     items: 'Objetos',
     visit: 'Visitar',

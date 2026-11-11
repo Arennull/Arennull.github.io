@@ -3,6 +3,8 @@ import type { L10n } from '../src/lib/types';
 export interface Project {
   id: string;
   name: string;
+  /** The name shown is made up: the real client is not named. */
+  codename?: boolean;
   featured: boolean;
   tagline: L10n;
   summary: L10n;
@@ -161,5 +163,151 @@ export const projects: Project[] = [
     metrics: [],
     stack: ['Next.js', 'tRPC', 'Prisma', 'PostgreSQL'],
     neuron: 'proj-platforms',
+  },
+  {
+    id: 'abacus',
+    name: 'Abacus',
+    codename: true,
+    featured: false,
+    tagline: { en: 'Sales and commission CRM', es: 'CRM de ventas y comisiones' },
+    summary: {
+      en: 'An open-source CRM extended only through its supported extension points, so upstream can still be merged. The commission split is configuration, and each won deal keeps an immutable snapshot of it. Runs on a shared Postgres with its own schema, sign-in and file storage adapters.',
+      es: 'Un CRM de código abierto ampliado solo por sus puntos de extensión, para poder seguir integrando la versión original. El reparto de comisiones es configuración y cada venta ganada guarda una copia inmutable. Funciona sobre un Postgres compartido con su propio esquema y adaptadores de acceso y de archivos.',
+    },
+    points: { en: [], es: [] },
+    metrics: [
+      { value: '31', label: { en: 'test files of its own', es: 'archivos de test propios' } },
+      {
+        value: '0',
+        label: { en: 'upstream files modified', es: 'archivos originales modificados' },
+      },
+    ],
+    stack: ['PHP', 'EspoCRM', 'PostgreSQL', 'Supabase', 'Docker', 'PHPUnit'],
+    neuron: 'proj-crm',
+  },
+  {
+    id: 'pitlane',
+    name: 'Pitlane',
+    codename: true,
+    featured: false,
+    tagline: {
+      en: 'Website, admin panel and API for a car dealership',
+      es: 'Web, panel y API para un concesionario',
+    },
+    summary: {
+      en: 'A public catalogue with an interactive garage, an admin panel for stock and leads, and an API. The server writes meta tags and structured data per route from live data, so crawlers that run no JavaScript still read every car. Layered rate limits and a demo mode that works with no database.',
+      es: 'Un catálogo público con garaje interactivo, un panel para stock y leads, y una API. El servidor escribe las etiquetas y los datos estructurados de cada ruta con datos reales, para que los rastreadores sin JavaScript lean cada coche. Límites de peticiones por capas y un modo demo que funciona sin base de datos.',
+    },
+    points: { en: [], es: [] },
+    metrics: [
+      { value: '−96%', label: { en: 'hero image weight', es: 'peso de la imagen principal' } },
+      {
+        value: '46',
+        label: { en: 'API, SEO and end-to-end tests', es: 'tests de API, SEO y e2e' },
+      },
+    ],
+    stack: ['Express', 'Prisma', 'Supabase', 'React', 'Vite', 'Playwright', 'Railway'],
+    neuron: 'proj-web-geo',
+  },
+  {
+    id: 'showhome',
+    name: 'Showhome',
+    codename: true,
+    featured: false,
+    tagline: {
+      en: 'Lead-capture site for a home staging business',
+      es: 'Web de captación para un negocio de home staging',
+    },
+    summary: {
+      en: 'A step-by-step calculator that ends in a personalised PDF report. Leads land in a shared spreadsheet guarded by two locks, one inside the process and one between instances. The page is pre-rendered so AI search engines can read and cite it.',
+      es: 'Una calculadora por pasos que termina en un informe PDF personalizado. Los leads llegan a una hoja de cálculo compartida protegida por dos cerrojos, uno dentro del proceso y otro entre instancias. La página se prerrenderiza para que los buscadores de IA puedan leerla y citarla.',
+    },
+    points: { en: [], es: [] },
+    metrics: [
+      {
+        value: '37 → 68',
+        label: { en: 'AI-search audit score', es: 'nota en la auditoría de búsqueda con IA' },
+      },
+      { value: '72', label: { en: 'test cases, run in CI', es: 'casos de test, en CI' } },
+    ],
+    stack: ['React', 'Vite', 'Express', 'Google Drive API', 'SendGrid', 'Vitest', 'GitHub Actions'],
+    neuron: 'proj-web-geo',
+  },
+  {
+    id: 'pitchsmith',
+    name: 'Pitchsmith',
+    codename: true,
+    featured: false,
+    tagline: {
+      en: 'From a sales call to a written proposal',
+      es: 'De una llamada comercial a una propuesta escrita',
+    },
+    summary: {
+      en: 'An internal two-stage language-model pipeline. The first stage turns a call transcript into strict JSON where every proposed solution must point to a pain the client actually voiced, and anything doubtful is flagged. The second writes the proposal, which a headless browser exports as a full-page PDF.',
+      es: 'Un pipeline interno de modelos de lenguaje en dos fases. La primera convierte la transcripción de una llamada en JSON estricto donde cada solución propuesta debe apuntar a un problema que el cliente dijo de verdad, y lo dudoso queda marcado. La segunda redacta la propuesta, que un navegador sin interfaz exporta como PDF a página completa.',
+    },
+    points: { en: [], es: [] },
+    metrics: [],
+    stack: ['n8n', 'OpenAI', 'Puppeteer', 'Chrome extension', 'Express'],
+    neuron: 'proj-pipeline',
+  },
+  {
+    id: 'kettlebell',
+    name: 'Kettlebell',
+    codename: true,
+    featured: false,
+    tagline: {
+      en: 'Contributor to a subscription fitness app',
+      es: 'Colaborador en una app de fitness por suscripción',
+    },
+    summary: {
+      en: 'A web and mobile product built by the team, where I shipped fixes and features in check-ins, nutrition, challenges and ranking, plus an Android release. Underneath: access scoped to the owner on the server, card payments granted only by an idempotent webhook, and an AI check-in coach behind a swappable interface.',
+      es: 'Un producto web y móvil hecho por el equipo, donde entregué arreglos y funciones en check-ins, nutrición, retos y ranking, además de una versión de Android. Por debajo: acceso limitado al propietario en el servidor, pagos con tarjeta que solo concede un webhook idempotente y un coach de check-in con IA detrás de una interfaz intercambiable.',
+    },
+    points: { en: [], es: [] },
+    metrics: [],
+    stack: ['Bun', 'Express', 'Prisma', 'Supabase', 'React', 'Capacitor', 'OpenAI'],
+    neuron: 'proj-payments',
+  },
+  {
+    id: 'apothecary',
+    name: 'Apothecary',
+    codename: true,
+    featured: false,
+    tagline: {
+      en: 'Shop for personalised skincare routines',
+      es: 'Tienda de rutinas de cuidado personalizadas',
+    },
+    summary: {
+      en: 'Routine builder, card payment, a questionnaire with photos after paying, and invoices. The payment gateway is integrated by hand with signature checks, photo links are signed and expire, invoices are written atomically as PDF, and the marketing pixel waits for consent.',
+      es: 'Configurador de rutina, pago con tarjeta, un cuestionario con fotos después de pagar y facturas. La pasarela de pago está integrada a mano con verificación de firma, los enlaces a las fotos van firmados y caducan, las facturas se escriben de forma atómica en PDF y el píxel de marketing espera al consentimiento.',
+    },
+    points: { en: [], es: [] },
+    metrics: [],
+    stack: ['Next.js', 'React', 'Tailwind', 'Redsys', 'pdf-lib', 'Railway'],
+    neuron: 'proj-payments',
+  },
+  {
+    id: 'signpost',
+    name: 'Signpost',
+    codename: true,
+    featured: false,
+    tagline: {
+      en: 'Bilingual company website',
+      es: 'Web corporativa bilingüe',
+    },
+    summary: {
+      en: 'A marketing site in two languages with scroll animation and video. Alternate-language links and structured data match the content, video adapts to the device, motion respects the reduced-motion setting, and every route has an end-to-end test.',
+      es: 'Una web de marketing en dos idiomas con animación al hacer scroll y vídeo. Los enlaces entre idiomas y los datos estructurados coinciden con el contenido, el vídeo se adapta al dispositivo, el movimiento respeta la preferencia de reducirlo y cada ruta tiene un test de extremo a extremo.',
+    },
+    points: { en: [], es: [] },
+    metrics: [
+      {
+        value: '100/100',
+        label: { en: 'AI crawler access audit', es: 'auditoría de acceso de rastreadores de IA' },
+      },
+    ],
+    stack: ['Next.js', 'next-intl', 'GSAP', 'Playwright', 'Docker'],
+    neuron: 'proj-web-geo',
   },
 ];

@@ -344,6 +344,48 @@ export const knowledge: KnowledgeNode[] = [
       es: 'Más allá de la IA, trabajo en productos full stack: Proyectasport, una plataforma de deporte escolar con permisos por rol y enlaces firmados para las familias; Catalyst, una herramienta de RR. HH. con concurrencia optimista; y un ERP de inversión para Private Equity Club.',
     },
   },
+  {
+    id: 'proj-crm',
+    cluster: 'projects',
+    title: {
+      en: 'Abacus — a CRM that pays commissions',
+      es: 'Abacus — un CRM que paga comisiones',
+    },
+    text: {
+      en: 'Abacus is the codename of a sales CRM built on an open-source one, extended only through its extension points so the original can still be merged. The commission split between salespeople is configuration, and each won deal freezes an immutable copy of it.',
+      es: 'Abacus es el nombre en clave de un CRM de ventas montado sobre uno de código abierto, ampliado solo por sus puntos de extensión para poder seguir integrando el original. El reparto de comisiones entre comerciales es configuración, y cada venta ganada congela una copia inmutable.',
+    },
+  },
+  {
+    id: 'proj-web-geo',
+    cluster: 'projects',
+    title: { en: 'Websites that AI search can read', es: 'Webs que la búsqueda con IA sabe leer' },
+    text: {
+      en: 'Pitlane, Showhome and Signpost are codenames of client websites: a car dealership, a home staging business and a bilingual company site. The server pre-renders text and structured data so crawlers with no JavaScript can read them; on Showhome the AI-search audit went from 37 to 68.',
+      es: 'Pitlane, Showhome y Signpost son nombres en clave de webs de cliente: un concesionario, un negocio de home staging y una web corporativa bilingüe. El servidor prerrenderiza el texto y los datos estructurados para que los rastreadores sin JavaScript puedan leerlas; en Showhome la auditoría de búsqueda con IA pasó de 37 a 68.',
+    },
+  },
+  {
+    id: 'proj-pipeline',
+    cluster: 'projects',
+    title: {
+      en: 'Pitchsmith — sales call to proposal',
+      es: 'Pitchsmith — de la llamada a la propuesta',
+    },
+    text: {
+      en: 'Pitchsmith is the codename of an internal tool that turns the transcript of a sales call into a written proposal in two stages. The first extracts strict JSON where each proposed solution must point to a pain the client voiced; the second writes the document and exports it as PDF.',
+      es: 'Pitchsmith es el nombre en clave de una herramienta interna que convierte la transcripción de una llamada comercial en una propuesta escrita en dos fases. La primera extrae JSON estricto donde cada solución propuesta debe apuntar a un problema que el cliente dijo; la segunda redacta el documento y lo exporta a PDF.',
+    },
+  },
+  {
+    id: 'proj-payments',
+    cluster: 'projects',
+    title: { en: 'Payments and subscriptions', es: 'Pagos y suscripciones' },
+    text: {
+      en: 'Kettlebell and Apothecary are codenames of two products that charge by card: a subscription fitness app I contributed to and a skincare shop. In both, the payment gateway signature is verified on the server, and in the app only an idempotent webhook can grant access.',
+      es: 'Kettlebell y Apothecary son nombres en clave de dos productos que cobran con tarjeta: una app de fitness por suscripción en la que colaboré y una tienda de cuidado de la piel. En ambos la firma de la pasarela de pago se verifica en el servidor, y en la app solo un webhook idempotente puede conceder el acceso.',
+    },
+  },
 
   // ───────────── About ─────────────
   {
