@@ -1037,12 +1037,6 @@ button:disabled {
   animation: bob 0.8s steps(2) infinite;
 }
 
-@keyframes bob {
-  50% {
-    transform: translateY(-3px);
-  }
-}
-
 h2 > .num {
   display: inline;
   color: var(--silver);
@@ -1378,6 +1372,102 @@ details p {
 
 .fighter > .hurt:first-child {
   animation: hurt 0.45s steps(6);
+}
+
+/* The hero steps back, lunges with the katana level and returns; then he bobs again. */
+.fighter.hero > .attack:first-child {
+  position: relative;
+  animation:
+    lunge 0.5s steps(8),
+    bob 1s steps(2) 0.5s infinite;
+}
+
+.fighter.hero > .attack.hurt:first-child {
+  animation:
+    lunge 0.5s steps(8),
+    hurt 0.45s steps(6) 0.55s;
+}
+
+.attack .avatar {
+  animation: sheathe 0.5s steps(1);
+}
+
+.attack .strike {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  animation: draw 0.5s steps(1);
+}
+
+@keyframes lunge {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-10px);
+  }
+  40%,
+  70% {
+    transform: translateX(80px);
+  }
+}
+
+@keyframes sheathe {
+  20%,
+  75% {
+    opacity: 0;
+  }
+  0%,
+  19%,
+  76%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes draw {
+  20%,
+  75% {
+    opacity: 1;
+  }
+  0%,
+  19%,
+  76%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* The enemy takes the cut a moment later, when the blade arrives. */
+.fighter.enemy > .hurt:first-child {
+  position: relative;
+  animation: hurt 0.45s steps(6) 0.2s;
+}
+
+.fighter.enemy > .hurt:first-child::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  background: linear-gradient(135deg, transparent 46%, var(--white) 46% 54%, transparent 54%);
+  opacity: 0;
+  animation: slash 0.3s steps(4) 0.2s;
+}
+
+@keyframes slash {
+  0% {
+    opacity: 1;
+    clip-path: inset(0 100% 100% 0);
+  }
+  50% {
+    opacity: 1;
+    clip-path: inset(0);
+  }
+  100% {
+    opacity: 0;
+    clip-path: inset(0);
+  }
 }
 
 @keyframes hurt {

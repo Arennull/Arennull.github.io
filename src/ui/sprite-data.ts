@@ -35,6 +35,18 @@ export const HERO: SpriteData = {
   },
 };
 
+/** The same samurai mid-strike: the katana swung level, four pixels past the body. */
+export const HERO_ATTACK: SpriteData = {
+  rows: HERO.rows.map((row, y) => {
+    // Rows 6 to 11 hold the upright katana of the resting pose.
+    const body = y >= 6 && y <= 11 ? `${row.slice(0, 11)}.` : row;
+    if (y === 9) return `${body.slice(0, 10)}syowww`;
+    if (y === 10) return `${body.slice(0, 10)}r.....`;
+    return `${body}....`;
+  }),
+  colors: HERO.colors,
+};
+
 export const ENEMIES: Record<BattleId, SpriteData> = {
   // Lost Query: a ghost that never found its answer.
   retriever: {
