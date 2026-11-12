@@ -369,9 +369,9 @@ export const knowledge: KnowledgeNode[] = [
       ja: 'Sangi — 不採用にしたリランカー',
     },
     text: {
-      en: 'On Sangi we compared retrieval variants on 103 cases. Rank fusion won with an MRR of 0.73 on the held-out split, and a reranker was rejected because it lowered recall@10 from 0.92 to 0.85 and added about 4.8 seconds.',
-      es: 'En Sangi comparamos variantes de recuperación con 103 casos. La fusión por rango ganó con un MRR de 0,73 en la parte de reserva, y se descartó un reranker porque bajaba el recall@10 de 0,92 a 0,85 y añadía unos 4,8 segundos.',
-      ja: 'Sangiでは、103件のケースで検索の各方式を比較しました。逆順位融合(RRF)がホールドアウト分割でMRR 0.73を記録して勝ち、リランカーはrecall@10を0.92から0.85に下げ、約4.8秒を加えたため不採用としました。',
+      en: 'On Sangi we compared retrieval variants on 103 cases. Rank fusion reached an MRR of 0.73 on the held-out split, against 0.70 for normalised scores, and a reranker was rejected because it lowered recall@10 from 0.92 to 0.85 and added about 4.8 seconds.',
+      es: 'En Sangi comparamos variantes de recuperación con 103 casos. La fusión por rango alcanzó un MRR de 0,73 en la parte de reserva, frente a 0,70 con puntuaciones normalizadas, y se descartó un reranker porque bajaba el recall@10 de 0,92 a 0,85 y añadía unos 4,8 segundos.',
+      ja: 'Sangiでは、103件のケースで検索の各方式を比較しました。逆順位融合(RRF)はホールドアウト分割でMRR 0.73を記録し(スコア正規化は0.70)、リランカーはrecall@10を0.92から0.85に下げ、約4.8秒を加えたため不採用としました。',
     },
   },
   {
@@ -411,9 +411,9 @@ export const knowledge: KnowledgeNode[] = [
       ja: 'JairoFitness — 人間を相手にしたテスト',
     },
     text: {
-      en: 'In blind A/B tests on JairoFitness, the judge mistook the AI for the real coach about 31% of the time. An output filter that stops internal notes reaching clients had zero false positives over 5,041 real sentences, at about 1.7 s p95 latency.',
-      es: 'En pruebas A/B a ciegas en JairoFitness, el juez confundió a la IA con el coach real cerca del 31 % de las veces. Un filtro de salida que impide que las notas internas lleguen al cliente dio cero falsos positivos sobre 5.041 frases reales, con una latencia p95 de unos 1,7 s.',
-      ja: 'JairoFitnessのブラインドA/Bテストでは、ジャッジが約31%の確率でAIを本物のコーチと取り違えました。内部メモが顧客に届くのを防ぐ出力フィルターは、実際の5,041文で誤検知がゼロで、p95レイテンシは約1.7秒でした。',
+      en: 'In blind A/B tests on JairoFitness, the judge mistook the AI for the real coach about 31% of the time. An output filter that stops internal notes reaching clients had zero false positives over 5,041 real lines. A chat reply takes about 1.7 s at p95.',
+      es: 'En pruebas A/B a ciegas en JairoFitness, el juez confundió a la IA con el coach real cerca del 31 % de las veces. Un filtro de salida que impide que las notas internas lleguen al cliente dio cero falsos positivos sobre 5.041 líneas reales. Una respuesta de chat tarda unos 1,7 s en el p95.',
+      ja: 'JairoFitnessのブラインドA/Bテストでは、ジャッジが約31%の確率でAIを本物のコーチと取り違えました。内部メモが顧客に届くのを防ぐ出力フィルターは、実際の5,041行で誤検知がゼロでした。チャット応答のp95レイテンシは約1.7秒です。',
     },
   },
   {

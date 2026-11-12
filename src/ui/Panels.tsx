@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { partOf, profile, projectFacts } from '../../content/project-facts';
 import { projects } from '../../content/projects';
 import { LANGUAGE_REPOS, languages } from '../../content/skills';
 import { ChunkingLab } from '../games/ChunkingLab';
@@ -8,7 +10,7 @@ import { useI18n } from '../i18n';
 import { CLUSTER_COLORS, CONTACT, PALETTE, STACK } from '../i18n/strings';
 import { neuronById, neurons } from '../lib/brain';
 import { bossUnlocked, TRIALS, WIN_XP, type BattleId, type TrialId } from '../lib/progress';
-import { CLUSTERS } from '../lib/types';
+import { CLUSTERS, type Lang } from '../lib/types';
 import { Battle } from './Battle';
 import { useGame } from './progress';
 import { ENEMIES, LANDMARKS } from './sprite-data';
@@ -113,6 +115,27 @@ export function Trials({ onHero }: { onHero: () => void }) {
   );
 }
 
+/** 2026-05 → 05/2026, or 2026年5月 in Japanese. */
+function month(date: string, lang: Lang): string {
+  const [year, mm] = date.split('-');
+  return lang === 'ja' ? `${year}年${Number(mm)}月` : `${mm}/${year}`;
+}
+
+/** My part in a project, as its version history tells it. */
+function Role({ id }: { id: string }) {
+  const { t, lang } = useI18n();
+  const facts = projectFacts[id];
+  if (!facts) return null;
+  const [from, to] = facts.period;
+  return (
+    <span className="role">
+      <b>{t.quests.parts[partOf(facts.commits)]}</b> ·{' '}
+      {t.quests.commits(facts.commits.mine, facts.commits.total)} ·{' '}
+      {from === to ? month(from, lang) : `${month(from, lang)} – ${month(to, lang)}`}
+    </span>
+  );
+}
+
 export function Quests({ onLocate }: { onLocate: (index: number) => void }) {
   const { t, lang } = useI18n();
   const { progress, gain } = useGame();
@@ -160,6 +183,7 @@ export function Quests({ onLocate }: { onLocate: (index: number) => void }) {
               {p.codename && ` · ${t.quests.codename}`}
             </small>
             <p>{p.tagline[lang]}</p>
+            <Role id={p.id} />
           </div>
         </header>
         {p.metrics.length > 0 && (
@@ -181,6 +205,16 @@ export function Quests({ onLocate }: { onLocate: (index: number) => void }) {
             <li key={s}>{s}</li>
           ))}
         </ul>
+        {projectFacts[p.id]?.decisions && (
+          <>
+            <h3>{t.quests.decisions}</h3>
+            <ul className="points">
+              {projectFacts[p.id]!.decisions![lang].map((decision) => (
+                <li key={decision}>{decision}</li>
+              ))}
+            </ul>
+          </>
+        )}
         <details>
           <summary>{t.quests.details}</summary>
           {p.points[lang].length > 0 ? (
@@ -356,9 +390,57 @@ export function HeroSheet() {
   );
 }
 
+/** What the CV says, shared by the dialog on screen and the copy that goes to paper. */
+function CvBody({ titleId }: { titleId?: string }) {
+  const { t, lang } = useI18n();
+  return (
+    <>
+      <h2 id={titleId}>{t.cv.title}</h2>
+      <p>{t.sheet.quest}</p>
+      <p>{t.cv.location}</p>
+      <ul className="points">
+        {t.cv.bullets.map((b) => (
+          <li key={b}>{b}</li>
+        ))}
+      </ul>
+      <h3>{t.cv.experience}</h3>
+      <p>{t.cv.since(month(profile.since, lang))}</p>
+      <h3>{t.cv.projects}</h3>
+      <ul className="cv-projects">
+        {projects.map((p) => (
+          <li key={p.id}>
+            <b>
+              {p.url ? (
+                <a href={p.url} target="_blank" rel="noreferrer">
+                  {p.name}
+                </a>
+              ) : (
+                p.name
+              )}
+            </b>{' '}
+            — {p.tagline[lang]}
+            <Role id={p.id} />
+            {p.metrics.length > 0 && (
+              <span className="role">
+                {p.metrics.map((m) => `${m.value} ${m.label[lang]}`).join(' · ')}
+              </span>
+            )}
+          </li>
+        ))}
+      </ul>
+      <h3>{t.cv.spoken}</h3>
+      <p>{t.cv.spokenList}</p>
+      <h3>{t.cv.code}</h3>
+      <p>{languages.map((l) => l.name).join(' · ')}</p>
+      <h3>{t.cv.stack}</h3>
+      <p>{STACK.join(' · ')}</p>
+    </>
+  );
+}
+
 /** The plain version for whoever has thirty seconds and no time to play. */
 export function CvDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { t, lang } = useI18n();
+  const { t } = useI18n();
   const ref = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -369,46 +451,45 @@ export function CvDialog({ open, onClose }: { open: boolean; onClose: () => void
   }, [open]);
 
   return (
-    <dialog
-      ref={ref}
-      className="cv win"
-      aria-labelledby="cv-title"
-      onClose={onClose}
-      onClick={(e) => {
-        if (e.target === ref.current) onClose();
-      }}
-    >
-      <div>
-        <h2 id="cv-title">{t.cv.title}</h2>
-        <ul className="points">
-          {t.cv.bullets.map((b) => (
-            <li key={b}>{b}</li>
-          ))}
-        </ul>
-        <h3>{t.cv.projects}</h3>
-        <ul className="cv-projects">
-          {projects.map((p) => (
-            <li key={p.id}>
-              <b>{p.name}</b> — {p.tagline[lang]}
-            </li>
-          ))}
-        </ul>
-        <h3>{t.sheet.languages}</h3>
-        <p>{languages.map((l) => l.name).join(' · ')}</p>
-        <h3>{t.cv.stack}</h3>
-        <p>{STACK.join(' · ')}</p>
-        <div className="row">
-          <a className="btn primary" href={`mailto:${CONTACT.email}`}>
-            ✉ {CONTACT.email}
-          </a>
-          <a className="btn" href={CONTACT.github} target="_blank" rel="noreferrer">
-            GitHub ↗
-          </a>
-          <button type="button" className="btn" onClick={onClose}>
-            {t.cv.close}
-          </button>
+    <>
+      <dialog
+        ref={ref}
+        className="cv win"
+        aria-labelledby="cv-title"
+        onClose={onClose}
+        onClick={(e) => {
+          if (e.target === ref.current) onClose();
+        }}
+      >
+        <div>
+          <CvBody titleId="cv-title" />
+          <div className="row">
+            <a className="btn primary" href={`mailto:${CONTACT.email}`}>
+              ✉ {CONTACT.email}
+            </a>
+            <a className="btn" href={CONTACT.github} target="_blank" rel="noreferrer">
+              {t.sheet.github} ↗
+            </a>
+            <button type="button" className="btn" onClick={() => window.print()}>
+              {t.cv.print}
+            </button>
+            <button type="button" className="btn" onClick={onClose}>
+              {t.cv.close}
+            </button>
+          </div>
         </div>
-      </div>
-    </dialog>
+      </dialog>
+      {/* A modal dialog prints badly, so paper gets its own copy, outside the game. */}
+      {open &&
+        createPortal(
+          <div className="cv-print" aria-hidden>
+            <CvBody />
+            <p>
+              {CONTACT.email} · {CONTACT.github}
+            </p>
+          </div>,
+          document.body,
+        )}
+    </>
   );
 }
