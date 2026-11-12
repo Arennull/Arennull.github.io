@@ -1,11 +1,11 @@
 # Portfolio de Alejandro Tiscar
 
-Web personal publicada en <https://arennull.github.io>, planteada como un pequeño RPG: el mapa es un cerebro 3D cuyas neuronas son fragmentos de conocimiento con embeddings reales. El visitante viaja de neurona en neurona, pregunta al Oráculo, gana combates y sube de nivel.
+Web personal publicada en <https://arennull.github.io>, planteada como un pequeño RPG: el mapa es una ciudad cyberpunk japonesa en 3D donde cada torre es un fragmento de conocimiento, colocado según sus embeddings reales. El visitante viaja de torre en torre, pregunta al Oráculo, gana combates y sube de nivel.
 
 ## Qué hay dentro
 
 - **Pantalla de título** con nueva partida, continuar, sonido e idioma.
-- **Mapa** (Three.js con React Three Fiber, renderizado en píxeles): corteza de partículas generada por código; cada neurona se coloca según la proyección UMAP de su embedding y empieza oculta hasta que se descubre. El héroe camina por las sinapsis con las flechas del teclado o con clics.
+- **Mapa** (Three.js con React Three Fiber, renderizado en píxeles): ciudad generada por código, con rascacielos de ventanas encendidas, carteles de neón con kanji, autopista elevada, tráfico, coches voladores, torii y lluvia. Cada fragmento ocupa la parcela más cercana a la proyección UMAP de su embedding, es más alto cuantas más conexiones tiene y empieza apagado hasta que se descubre. El héroe va por las calles con las flechas del teclado o con clics. En móvil y equipos modestos la escena se aligera sola.
 - **Oráculo**: para cada pregunta se calcula en el navegador la búsqueda vectorial (coseno), la búsqueda por palabras (BM25) y su fusión por rango recíproco. Solo la redacción de la respuesta está escrita de antemano.
 - **Combates** por turnos en un dojo, sin preguntas: el samurái elige entre cuatro técnicas (cada enemigo es débil a una), ponerse en guardia, beber té o huir. Tres guardianes y un jefe final, la Alucinación. Aparte hay un **entrenamiento** opcional con tres minijuegos sobre los embeddings reales («Sé el retriever», «Chunking lab» y «Más cerca o más lejos»).
 - **Misiones**: un mapa donde cada proyecto es un lugar en pixel art con su ficha (botín, objetos y cómo se hizo). **Héroe**: ficha, stack y contacto.
@@ -18,7 +18,7 @@ Web personal publicada en <https://arennull.github.io>, planteada como un peque�
 content/                 textos: fragmentos, preguntas, juegos y proyectos (en/es)
 scripts/build-brain.ts   vectoriza el contenido y escribe src/data/brain.json
 src/lib/                 lógica pura con tests: vectores, BM25, RRF, troceado, progreso, combate
-src/brain/               escena 3D
+src/city/                escena 3D: trazado de la ciudad, decorado y torres
 src/games/               minijuegos de entrenamiento
 src/ui/                  título, HUD, menú, diálogo, combate, sprites y paneles del juego
 ```

@@ -1,19 +1,19 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { BrainQuery } from '../brain/BrainScene';
-import { toScene } from '../brain/shape';
+import type { CityQuery } from '../city/CityScene';
+import { hoverOver } from '../city/layout';
 import { useReducedMotion } from '../hooks';
 import { useI18n } from '../i18n';
 import { dims, embeddedQueries, rankNeurons, retrieve, type Neuron } from '../lib/brain';
 import type { Scored } from '../lib/vector';
 import { useGame } from './progress';
 
-export interface BrainFocus {
+export interface CityFocus {
   lit: number[];
   sources: number[];
-  query: BrainQuery | null;
+  query: CityQuery | null;
 }
 
-export const NO_FOCUS: BrainFocus = { lit: [], sources: [], query: null };
+export const NO_FOCUS: CityFocus = { lit: [], sources: [], query: null };
 
 export interface OracleLine {
   text: string;
@@ -22,7 +22,7 @@ export interface OracleLine {
 }
 
 interface Props {
-  onFocus: (focus: BrainFocus) => void;
+  onFocus: (focus: CityFocus) => void;
   onLine: (line: OracleLine | null) => void;
 }
 
@@ -44,19 +44,14 @@ export function Oracle({ onFocus, onLine }: Props) {
     [active, lang],
   );
 
-  // Where the question lands in the brain: between its three nearest neurons.
+  // Where the question hovers over the city: above the three towers nearest to it in meaning.
   // One object per run, so the scene restarts its animation once per question.
   const query = useMemo(() => {
     if (!active) return null;
-    const top = rankNeurons(active.vec)
+    const nearest = rankNeurons(active.vec)
       .slice(0, 3)
-      .map((s) => toScene(s.item.pos));
-    const origin = [0, 1, 2].map((d) => top.reduce((sum, p) => sum + p[d]!, 0) / top.length) as [
-      number,
-      number,
-      number,
-    ];
-    return { key: run, origin };
+      .map((s) => s.item.index);
+    return { key: run, origin: hoverOver(nearest) };
   }, [active, run]);
 
   const firstStep = reducedMotion ? 4 : 1;

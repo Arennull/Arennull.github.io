@@ -392,19 +392,19 @@ button:disabled {
   min-height: 0;
 }
 
-.brain-stage {
+.city-stage {
   position: relative;
   flex: 1;
   min-width: 0;
   overflow: hidden;
 }
 
-.brain-stage canvas {
+.city-stage canvas {
   image-rendering: pixelated;
   touch-action: pan-y;
 }
 
-.brain-loading {
+.city-loading {
   position: absolute;
   inset: calc(50% - 12px);
   background: var(--yellow);
@@ -417,7 +417,7 @@ button:disabled {
   }
 }
 
-.brain-hint {
+.city-hint {
   position: absolute;
   left: 0;
   right: 0;
@@ -428,11 +428,11 @@ button:disabled {
   pointer-events: none;
 }
 
-.neuron-label {
+.building-label {
   pointer-events: none;
 }
 
-.neuron-label span {
+.building-label span {
   display: block;
   white-space: nowrap;
   max-width: 230px;
@@ -446,7 +446,7 @@ button:disabled {
   color: var(--white);
 }
 
-.brain2d {
+.city2d {
   height: 100%;
   display: grid;
   place-content: center;
@@ -455,18 +455,17 @@ button:disabled {
   color: var(--silver);
 }
 
-.brain2d svg {
+.city2d svg {
   width: min(100%, 560px);
 }
 
-.brain2d rect {
+.city2d rect {
   cursor: pointer;
 }
 
-.brain2d-outline {
-  fill: var(--navy);
-  stroke: var(--slate);
-  stroke-width: 0.01;
+.city2d rect.city2d-block {
+  fill: var(--ink);
+  cursor: default;
 }
 
 .panel {
@@ -1719,7 +1718,7 @@ details p {
     display: contents;
   }
 
-  .brain-stage {
+  .city-stage {
     order: 1;
     flex: none;
     height: 40svh;
@@ -1824,7 +1823,7 @@ details p {
     flex: 1;
   }
 
-  .brain-stage {
+  .city-stage {
     min-height: 220px;
   }
 
