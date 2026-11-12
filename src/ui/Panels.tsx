@@ -405,7 +405,6 @@ function CvBody({ titleId }: { titleId?: string }) {
       </ul>
       <h3>{t.cv.experience}</h3>
       <p>{t.cv.since(month(profile.since, lang))}</p>
-      <p>{t.cv.years(profile.years)}</p>
       <h3>{t.cv.projects}</h3>
       <ul className="cv-projects">
         {projects.map((p) => (

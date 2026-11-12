@@ -85,9 +85,8 @@ export function partOf(commits: ProjectFacts['commits']): Part {
   return share >= 0.9 ? 'lead' : share >= 0.5 ? 'co' : 'contributor';
 }
 
-/** What goes on the CV besides the projects. Stated by me, not derived from the repositories. */
+/** What goes on the CV besides the projects. */
 export const profile = {
   /** Month of my first commit at the agency, as YYYY-MM. */
   since: '2026-02',
-  years: 2,
 };

@@ -212,9 +212,9 @@ export const projects: Project[] = [
       ja: '不動産投資ERP',
     },
     summary: {
-      en: 'Companies, projects, investors, returns, signatures and KYC in one system, with a configurable automation builder and integrations for invoicing and identity checks.',
-      es: 'Sociedades, proyectos, inversores, retornos, firmas y KYC en un solo sistema, con un constructor de automatizaciones configurable e integraciones de facturación y verificación de identidad.',
-      ja: '法人、プロジェクト、投資家、リターン、署名、KYCを1つのシステムに集約。設定可能な自動化ビルダーと、請求書発行・本人確認との連携を備える。',
+      en: 'A system built by the team, to which I contributed two commits. Companies, projects, investors, returns, signatures and KYC in one system, with a configurable automation builder and integrations for invoicing and identity checks.',
+      es: 'Un sistema hecho por el equipo, al que aporté dos commits. Sociedades, proyectos, inversores, retornos, firmas y KYC en un solo sistema, con un constructor de automatizaciones configurable e integraciones de facturación y verificación de identidad.',
+      ja: 'チームが構築したシステムで、私の貢献はコミット2件です。法人、プロジェクト、投資家、リターン、署名、KYCを1つのシステムに集約。設定可能な自動化ビルダーと、請求書発行・本人確認との連携を備える。',
     },
     points: { en: [], es: [], ja: [] },
     metrics: [],
