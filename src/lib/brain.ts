@@ -6,7 +6,7 @@ import { chunkText, type Chunk } from './chunker';
 import { LANGS } from './types';
 import type { BrainData, Concept, KnowledgeNode, Lang, PreparedQuery } from './types';
 import { buildLexicalIndex, rrf, type LexicalIndex } from './lexical';
-import { decodeVec, rank, topK, type Scored, type Vec } from './vector';
+import { decodeVec, meanVec, rank, topK, type Scored, type Vec } from './vector';
 
 const data = raw as unknown as BrainData;
 
@@ -94,6 +94,33 @@ export function retrieve(queryVec: Vec, queryText: string, lang: Lang): Retrieva
 
 export function rankNeurons(queryVec: Vec): Scored<Neuron>[] {
   return rank(queryVec, neurons, vecOf);
+}
+
+export type Mode = 'vector' | 'lexical' | 'hybrid';
+export const MODES: Mode[] = ['vector', 'lexical', 'hybrid'];
+
+/** Fragments ranked one way only, best first: what each half finds, and what both find together. */
+export function rankBy(mode: Mode, queryVec: Vec, queryText: string, lang: Lang): Neuron[] {
+  if (mode === 'vector') return rankNeurons(queryVec).map((s) => s.item);
+  if (mode === 'lexical') {
+    return lexicalIndexes[lang].search(queryText, neurons.length).map((s) => s.item);
+  }
+  return retrieve(queryVec, queryText, lang).fused.map((s) => s.item);
+}
+
+/** How many keyword hits lend their vectors to a query that has none of its own. */
+const FEEDBACK_K = 3;
+
+/**
+ * Search for text nobody embedded beforehand. There is no model in the browser
+ * to turn it into a vector, so the best keyword hits stand in for it: their
+ * mean vector is the query (pseudo-relevance feedback), and from there on it is
+ * the same hybrid retrieval. Null when no word of the text is known.
+ */
+export function searchText(text: string, lang: Lang): Retrieval | null {
+  const seeds = lexicalIndexes[lang].search(text, FEEDBACK_K);
+  if (seeds.length === 0) return null;
+  return retrieve(meanVec(seeds.map((s) => s.item.vec)), text, lang);
 }
 
 export function neighbours(neuron: Neuron, k = 4): Scored<Neuron>[] {
