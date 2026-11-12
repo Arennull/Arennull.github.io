@@ -582,6 +582,78 @@ button:disabled {
 }
 
 /* ───────── Oracle ───────── */
+.search {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.search input {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 10px;
+  background: var(--night);
+  border: var(--px) solid var(--white);
+  color: var(--white);
+  font: inherit;
+}
+
+.search input::placeholder {
+  color: var(--slate);
+}
+
+.under-hood,
+.evaluation {
+  margin-top: 14px;
+}
+
+.under-hood .bad {
+  margin: 0 0 8px;
+  color: var(--orange);
+  font-size: 0.9rem;
+}
+
+.evaluation p {
+  margin: 8px 0;
+  font-size: 0.9rem;
+  color: var(--silver);
+}
+
+.evaluation .row {
+  margin: 8px 0 12px;
+}
+
+.inside {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.inside th,
+.inside td {
+  padding: 2px 6px;
+  border-bottom: 2px solid var(--ink);
+  text-align: left;
+}
+
+.inside thead th {
+  color: var(--silver);
+  font-weight: 400;
+}
+
+.inside .num {
+  white-space: nowrap;
+  color: var(--silver);
+}
+
+.inside tr.best td {
+  color: var(--yellow);
+}
+
+.toggle[hidden] {
+  display: none;
+}
+
 .toggle {
   display: inline-flex;
   margin: 12px 0;
