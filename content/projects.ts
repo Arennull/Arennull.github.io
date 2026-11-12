@@ -55,21 +55,25 @@ export const projects: Project[] = [
       {
         value: '0.73',
         label: {
-          en: 'MRR on held-out cases',
-          es: 'MRR en casos de reserva',
-          ja: 'ホールドアウトケースでのMRR',
+          en: 'MRR of rank fusion on 34 held-out cases (0.70 normalising scores)',
+          es: 'MRR de la fusión por rango en 34 casos de reserva (0,70 normalizando)',
+          ja: 'ホールドアウト34件での順位融合のMRR(スコア正規化は0.70)',
         },
       },
       {
         value: '103',
-        label: { en: 'evaluation cases', es: 'casos de evaluación', ja: '評価ケース' },
+        label: {
+          en: 'evaluation cases: 69 to tune, 34 held out',
+          es: 'casos de evaluación: 69 para ajustar, 34 de reserva',
+          ja: '評価ケース:調整用69件、ホールドアウト34件',
+        },
       },
       {
         value: '−4.8 s',
         label: {
-          en: 'latency saved by rejecting the reranker',
-          es: 'latencia ahorrada al descartar el reranker',
-          ja: 'リランカー不採用で短縮したレイテンシ',
+          en: 'median latency saved by rejecting the reranker',
+          es: 'latencia mediana ahorrada al descartar el reranker',
+          ja: 'リランカー不採用で短縮したレイテンシ(中央値)',
         },
       },
     ],
@@ -115,20 +119,27 @@ export const projects: Project[] = [
       {
         value: '31%',
         label: {
-          en: 'of blind tests: judge took the AI for the coach',
-          es: 'de las pruebas a ciegas: el juez tomó a la IA por el coach',
-          ja: 'ブラインドテストのうち、審査役がAIをコーチと判断した割合',
+          en: 'of 75 blind pairs: the judge took the AI for the coach (50% = cannot tell)',
+          es: 'de 75 pares a ciegas: el juez tomó a la IA por el coach (50 % = no los distingue)',
+          ja: 'ブラインド75組のうち、審査役がAIをコーチと判断した割合(50%で区別不能)',
         },
       },
       {
         value: '0 / 5,041',
         label: {
-          en: 'false positives of the output filter',
-          es: 'falsos positivos del filtro de salida',
-          ja: '出力フィルタの誤検知',
+          en: 'false positives of the filter that stops internal notes, on 5,041 real lines',
+          es: 'falsos positivos del filtro que frena notas internas, en 5.041 líneas reales',
+          ja: '内部メモを止めるフィルタの誤検知(実際の5,041行で検証)',
         },
       },
-      { value: '1.7 s', label: { en: 'p95 latency', es: 'latencia p95', ja: 'p95レイテンシ' } },
+      {
+        value: '1.7 s',
+        label: {
+          en: 'p95 of a chat reply (4–6 s with deep reasoning on)',
+          es: 'p95 de una respuesta de chat (4–6 s con razonamiento profundo)',
+          ja: 'チャット応答のp95(深い推論を有効にすると4〜6秒)',
+        },
+      },
     ],
     stack: ['Express', 'Prisma', 'pgvector', 'WebSockets', 'React', 'TanStack', 'Railway'],
     neuron: 'proj-jairo',
@@ -267,9 +278,9 @@ export const projects: Project[] = [
       {
         value: '−96%',
         label: {
-          en: 'hero image weight',
-          es: 'peso de la imagen principal',
-          ja: 'メイン画像の容量',
+          en: 'hero image weight: 11.7 MB → 416 KB',
+          es: 'peso de la imagen principal: 11,7 MB → 416 KB',
+          ja: 'メイン画像の容量:11.7 MB → 416 KB',
         },
       },
       {
@@ -304,9 +315,9 @@ export const projects: Project[] = [
       {
         value: '37 → 68',
         label: {
-          en: 'AI-search audit score',
-          es: 'nota en la auditoría de búsqueda con IA',
-          ja: 'AI検索監査スコア',
+          en: 'our own AI-search audit, before and after pre-rendering',
+          es: 'auditoría propia de búsqueda con IA, antes y después de prerrenderizar',
+          ja: '自前のAI検索監査(プリレンダリングの前後)',
         },
       },
       {
@@ -401,9 +412,9 @@ export const projects: Project[] = [
       {
         value: '100/100',
         label: {
-          en: 'AI crawler access audit',
-          es: 'auditoría de acceso de rastreadores de IA',
-          ja: 'AIクローラーアクセス監査',
+          en: 'our own AI-crawler access checklist, measured on staging',
+          es: 'lista propia de acceso de rastreadores de IA, medida en preproducción',
+          ja: '自前のAIクローラーアクセスチェックリスト(ステージングで計測)',
         },
       },
     ],

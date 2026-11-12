@@ -1,3 +1,4 @@
+import type { Part } from '../../content/project-facts';
 import type { MoveId } from '../lib/battle';
 import type { BattleId } from '../lib/progress';
 import type { Cluster, Lang } from '../lib/types';
@@ -238,6 +239,13 @@ const en = {
     details: 'How it was done',
     done: 'read',
     back: 'Quest map',
+    parts: { lead: 'Main author', co: 'Co-author', contributor: 'Contributor' } satisfies Record<
+      Part,
+      string
+    >,
+    commits: (mine: number, total?: number) =>
+      total === undefined ? `${mine} commits of my own` : `${mine} of ${total} commits`,
+    decisions: 'Decisions and what was turned down',
   },
   sheet: {
     class: 'Class',
@@ -259,6 +267,14 @@ const en = {
       'Decisions backed by evaluation: held-out test sets, recall@k, MRR, cost and latency.',
     ],
     projects: 'Projects',
+    experience: 'Experience',
+    years: (n: number) => `More than ${n} years of professional experience.`,
+    since: (date: string) => `The AI Business · AI Engineer · ${date} – today`,
+    location: 'Spain · open to remote work and to relocating',
+    spoken: 'Languages',
+    spokenList: 'Spanish (native) · English (professional) · Japanese (basic)',
+    code: 'Programming languages',
+    print: 'Print or save as PDF',
     stack: 'Stack',
     close: 'Back to the game',
   },
@@ -501,6 +517,10 @@ const es: Strings = {
     details: 'Cómo se hizo',
     done: 'leída',
     back: 'Mapa de misiones',
+    parts: { lead: 'Autor principal', co: 'Coautor', contributor: 'Colaborador' },
+    commits: (mine, total) =>
+      total === undefined ? `${mine} commits propios` : `${mine} de ${total} commits`,
+    decisions: 'Decisiones y descartes',
   },
   sheet: {
     class: 'Clase',
@@ -522,6 +542,14 @@ const es: Strings = {
       'Decisiones respaldadas por evaluación: casos de reserva, recall@k, MRR, coste y latencia.',
     ],
     projects: 'Proyectos',
+    experience: 'Experiencia',
+    years: (n) => `Más de ${n} años de experiencia profesional.`,
+    since: (date) => `The AI Business · AI Engineer · ${date} – hoy`,
+    location: 'España · abierto a trabajar en remoto y a mudarme',
+    spoken: 'Idiomas',
+    spokenList: 'Español (nativo) · Inglés (profesional) · Japonés (básico)',
+    code: 'Lenguajes de programación',
+    print: 'Imprimir o guardar como PDF',
     stack: 'Stack',
     close: 'Volver al juego',
   },
@@ -767,6 +795,10 @@ const ja: Strings = {
     details: 'つくりかた',
     done: '既読',
     back: 'クエストマップ',
+    parts: { lead: '主担当', co: '共同開発', contributor: '協力' },
+    commits: (mine, total) =>
+      total === undefined ? `自分のコミット ${mine}件` : `${total}件中 ${mine}件のコミット`,
+    decisions: '判断と 見送ったもの',
   },
   sheet: {
     class: 'クラス',
@@ -788,6 +820,14 @@ const ja: Strings = {
       '評価に基づく意思決定: ホールドアウトのテストセット、recall@k、MRR、コスト、レイテンシ。',
     ],
     projects: 'プロジェクト',
+    experience: '職歴',
+    years: (n) => `実務経験 ${n}年以上。`,
+    since: (date) => `The AI Business · AIエンジニア · ${date} 〜 現在`,
+    location: 'スペイン在住 · リモート勤務・転居 可',
+    spoken: '言語',
+    spokenList: 'スペイン語(母語)· 英語(ビジネス)· 日本語(初級)',
+    code: 'プログラミング言語',
+    print: '印刷 / PDFで保存',
     stack: 'スタック',
     close: 'ゲームにもどる',
   },

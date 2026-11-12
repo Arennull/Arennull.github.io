@@ -1301,6 +1301,24 @@ details p {
   color: var(--silver);
 }
 
+.role {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--silver);
+}
+
+.role b {
+  color: var(--lime);
+}
+
+.cv-projects li {
+  margin-bottom: 6px;
+}
+
+.cv-projects a {
+  color: inherit;
+}
+
 .cv-projects b {
   color: var(--white);
 }
@@ -1963,5 +1981,47 @@ details p {
   *::after {
     animation: none !important;
     transition: none !important;
+  }
+}
+
+.cv-print {
+  display: none;
+}
+
+/* The CV on paper: a plain copy of it, black on white, and nothing of the game. */
+@media print {
+  body {
+    background: #fff;
+    color: #000;
+  }
+
+  #root {
+    display: none;
+  }
+
+  .cv-print {
+    display: block;
+    font-family: system-ui, sans-serif;
+    font-size: 11pt;
+    line-height: 1.4;
+  }
+
+  .cv-print h2,
+  .cv-print h3,
+  .cv-print b,
+  .cv-print .role,
+  .cv-print .role b,
+  .cv-print a,
+  .cv-print li {
+    color: #000;
+    text-shadow: none;
+  }
+
+  .cv-print h3 {
+    margin-top: 12pt;
+  }
+
+  .cv-print .cv-projects li {
+    break-inside: avoid;
   }
 }
