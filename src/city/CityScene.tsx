@@ -52,7 +52,8 @@ export interface CitySceneProps {
 const TOWERS = CITY.towers;
 const TOPS = TOWERS.map((t) => new THREE.Vector3(...towerTop(t.index)));
 const COLORS = neurons.map((n) => new THREE.Color(CLUSTER_COLORS[n.node.cluster]));
-const UNKNOWN = new THREE.Color(PALETTE.silver);
+/** Towers not found yet keep the colour of their district, only fainter. */
+const FAINT = COLORS.map((c) => c.clone().multiplyScalar(0.5));
 const PATH = new THREE.Color(PALETTE.yellow);
 const TOWER_SIDE = LOT * 0.82;
 
@@ -177,13 +178,13 @@ function Towers(props: TowersProps) {
     const glows = mesh.geometry.getAttribute('aGlow') as THREE.InstancedBufferAttribute;
     const time = clock.elapsedTime;
     TOWERS.forEach((_, i) => {
-      let glow = named(i) ? 0.6 : 0.3;
+      let glow = named(i) ? 0.95 : 0.32;
       if (focused) glow = sourceSet.has(i) ? 1.5 : litSet.has(i) ? 0.95 : 0.05;
       if (selected === i) glow = 1.6;
       if (hovered === i) glow += 0.35;
       if (!reducedMotion) glow *= 1 + 0.12 * Math.sin(time * 1.6 + i * 1.7);
       glows.setX(i, glow);
-      (named(i) || litSet.has(i) ? COLORS[i]! : UNKNOWN).toArray(colors.array, i * 3);
+      COLORS[i]!.toArray(colors.array, i * 3);
     });
     colors.needsUpdate = true;
     glows.needsUpdate = true;
@@ -196,8 +197,8 @@ function Towers(props: TowersProps) {
         const cluster = neurons[i]!.node.cluster;
         const known = named(i) || litSet.has(i);
         const labelled = sourceSet.has(i) || hovered === i || selected === i;
-        const signColor = known ? COLORS[i]! : UNKNOWN;
-        const signY = t.height * 0.62;
+        const signColor = known ? COLORS[i]! : FAINT[i]!;
+        const signY = t.height * 0.64;
         return (
           <group key={neurons[i]!.node.id} position={[t.x, 0, t.z]}>
             {/* Invisible, slightly fat box: easier to hit than the tower itself. */}
@@ -228,7 +229,7 @@ function Towers(props: TowersProps) {
                     : [TOWER_SIDE / 2 + 0.006, signY, -TOWER_SIDE * 0.2]
                 }
               >
-                <planeGeometry args={[0.062, 0.124]} />
+                <planeGeometry args={[0.095, 0.19]} />
                 <meshBasicMaterial
                   map={signs[cluster]}
                   color={signColor}

@@ -58,7 +58,7 @@ export const BUILDING_FRAGMENT = glsl`
   ${FOG}
 
   void main() {
-    vec3 wall = vec3(0.07, 0.08, 0.13);
+    vec3 wall = vec3(0.085, 0.1, 0.16);
     vec3 color;
     if (vNormal.y > 0.5) {
       // Roof: dark, with a neon rim.
@@ -82,8 +82,8 @@ export const BUILDING_FRAGMENT = glsl`
       color += pane * lit * vColor * vGlow * 0.55;
       // Neon down the corners and around the top.
       float corner = step(vUv.x, 0.07) + step(0.93, vUv.x);
-      color += vColor * corner * (0.12 * uDim + 1.1 * vGlow);
-      color += vColor * step(0.95, vUv.y) * (0.16 * uDim + vGlow);
+      color += vColor * corner * (0.2 * uDim + 1.1 * vGlow);
+      color += vColor * step(0.94, vUv.y) * (0.25 * uDim + vGlow);
       // The street lights the first floors.
       color += vec3(0.85, 0.3, 0.6) * 0.14 * uDim * (1.0 - smoothstep(0.0, 0.09, vWorld.y));
     }
