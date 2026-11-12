@@ -1,11 +1,11 @@
 import { useCallback, useMemo, useState } from 'react';
-import { BrainStage } from './brain/BrainStage';
+import { CityStage } from './city/CityStage';
 import { useI18n } from './i18n';
 import { CLUSTER_COLORS, PALETTE, type Tab } from './i18n/strings';
 import { neighbours, neuronById, neurons } from './lib/brain';
 import type { Cluster } from './lib/types';
 import { Dialogue, Hud, MapInfo, Menu, Toasts, type Line } from './ui/Hud';
-import { NO_FOCUS, Oracle, type BrainFocus, type OracleLine } from './ui/Oracle';
+import { NO_FOCUS, Oracle, type CityFocus, type OracleLine } from './ui/Oracle';
 import { CvDialog, HeroSheet, Quests, Trials } from './ui/Panels';
 import { useGame } from './ui/progress';
 import { play } from './ui/sfx';
@@ -21,7 +21,7 @@ export default function App() {
   const [tab, setTab] = useState<Tab>('map');
   const [hero, setHero] = useState(HOME);
   const [selected, setSelected] = useState<number | null>(null);
-  const [focus, setFocus] = useState<BrainFocus>(NO_FOCUS);
+  const [focus, setFocus] = useState<CityFocus>(NO_FOCUS);
   const [oracle, setOracle] = useState<OracleLine | null>(null);
   const [region, setRegion] = useState<Cluster | null>(null);
   const [cv, setCv] = useState(false);
@@ -119,7 +119,7 @@ export default function App() {
         </>
       )}
       <main className="world">
-        <BrainStage
+        <CityStage
           lit={querying ? focus.lit : regionLit}
           sources={focus.sources}
           query={focus.query}

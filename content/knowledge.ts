@@ -1,7 +1,7 @@
 import type { KnowledgeNode } from '../src/lib/types';
 
 /**
- * Every entry is one neuron of the brain. `npm run build:brain` embeds them,
+ * Every entry is one tower of the city. `npm run build:brain` embeds them,
  * so editing a text here means regenerating src/data/brain.json.
  */
 export const knowledge: KnowledgeNode[] = [
@@ -149,9 +149,9 @@ export const knowledge: KnowledgeNode[] = [
     cluster: 'embeddings',
     title: { en: 'Quantization', es: 'Cuantización', ja: '量子化' },
     text: {
-      en: 'Quantization stores each vector dimension in one byte instead of four. The ranking barely changes and memory drops by 75%. The vectors behind this brain are quantized to 8 bits.',
-      es: 'La cuantización guarda cada dimensión del vector en un byte en lugar de cuatro. El ranking apenas cambia y la memoria baja un 75 %. Los vectores de este cerebro están cuantizados a 8 bits.',
-      ja: '量子化では、ベクトルの各次元を4バイトではなく1バイトで保存します。ランキングはほとんど変わらず、メモリは75%減ります。このブレインのベクトルは8ビットに量子化されています。',
+      en: 'Quantization stores each vector dimension in one byte instead of four. The ranking barely changes and memory drops by 75%. The vectors behind this city are quantized to 8 bits.',
+      es: 'La cuantización guarda cada dimensión del vector en un byte en lugar de cuatro. El ranking apenas cambia y la memoria baja un 75 %. Los vectores de esta ciudad están cuantizados a 8 bits.',
+      ja: '量子化では、ベクトルの各次元を4バイトではなく1バイトで保存します。ランキングはほとんど変わらず、メモリは75%減ります。この街のベクトルは8ビットに量子化されています。',
     },
   },
   {
@@ -172,14 +172,14 @@ export const knowledge: KnowledgeNode[] = [
     id: 'emb-projection',
     cluster: 'embeddings',
     title: {
-      en: 'Seeing 384 dimensions in 3D',
-      es: 'Ver 384 dimensiones en 3D',
-      ja: '384次元を3Dで見る',
+      en: 'Seeing 384 dimensions as a city',
+      es: 'Ver 384 dimensiones como una ciudad',
+      ja: '384次元を街として見る',
     },
     text: {
-      en: 'Each neuron here has 384 dimensions. UMAP squeezes them into three so they can be drawn, keeping neighbours together. The picture is a map; the real distances are computed in the full space.',
-      es: 'Cada neurona tiene aquí 384 dimensiones. UMAP las comprime a tres para poder dibujarlas, manteniendo juntos a los vecinos. El dibujo es un mapa; las distancias reales se calculan en el espacio completo.',
-      ja: 'ここでは各ニューロンが384次元を持ちます。UMAPがそれを3次元に圧縮し、近いもの同士を近くに保ったまま描画できるようにします。描かれた図は地図であり、実際の距離は元の全次元の空間で計算されます。',
+      en: 'Each tower here stands for a vector of 384 dimensions. UMAP squeezes them down so they can be drawn as a street plan, keeping neighbours together. The picture is a map; the real distances are computed in the full space.',
+      es: 'Cada torre representa aquí un vector de 384 dimensiones. UMAP las comprime para poder dibujarlas como un plano de calles, manteniendo juntos a los vecinos. El dibujo es un mapa; las distancias reales se calculan en el espacio completo.',
+      ja: 'ここでは各タワーが384次元のベクトルを表します。UMAPがそれを圧縮し、近いもの同士を近くに保ったまま街の区画として描画できるようにします。描かれた図は地図であり、実際の距離は元の全次元の空間で計算されます。',
     },
   },
 
