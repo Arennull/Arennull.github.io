@@ -40,6 +40,8 @@ export interface CitySceneProps {
   keys: boolean;
   /** Towers the visitor has already found; the rest show as unknown. */
   discovered: ReadonlySet<number>;
+  /** Towers seen from a visited one: named, not yet discovered. */
+  sighted: ReadonlySet<number>;
   unknownLabel: string;
   query: CityQuery | null;
   onSelect: (index: number | null) => void;
@@ -112,6 +114,8 @@ interface TowersProps {
   sources: number[];
   selected: number | null;
   discovered: ReadonlySet<number>;
+  /** Towers seen from a visited one: named, not yet discovered. */
+  sighted: ReadonlySet<number>;
   unknownLabel: string;
   hovered: number | null;
   onHover: (index: number | null) => void;
@@ -122,7 +126,7 @@ interface TowersProps {
 
 /** The towers that hold knowledge: one instanced mesh, lit by district and by state. */
 function Towers(props: TowersProps) {
-  const { lit, sources, selected, discovered, unknownLabel, hovered } = props;
+  const { lit, sources, selected, discovered, sighted, unknownLabel, hovered } = props;
   const { onHover, onSelect, reducedMotion, lang } = props;
   const material = useMemo(buildingMaterial, []);
   const signs = useMemo(
@@ -260,7 +264,7 @@ function Towers(props: TowersProps) {
                 className="building-label"
               >
                 <span style={{ borderColor: known ? CLUSTER_COLORS[cluster] : PALETTE.slate }}>
-                  {named(i) ? neurons[i]!.node.title[lang] : unknownLabel}
+                  {named(i) || sighted.has(i) ? neurons[i]!.node.title[lang] : unknownLabel}
                 </span>
               </Html>
             )}
@@ -480,7 +484,7 @@ function FramedControls(props: React.ComponentProps<typeof OrbitControls>) {
 
 export default function CityScene(props: CitySceneProps) {
   const { lit, sources, selected, query, onSelect, reducedMotion, lowPower, active, lang } = props;
-  const { discovered, unknownLabel, hero, keys } = props;
+  const { discovered, sighted, unknownLabel, hero, keys } = props;
   const [hovered, setHovered] = useState<number | null>(null);
   const [dragging, setDragging] = useState(false);
   const dimmed = lit.length > 0 || sources.length > 0;
@@ -522,6 +526,7 @@ export default function CityScene(props: CitySceneProps) {
         sources={sources}
         selected={selected}
         discovered={discovered}
+        sighted={sighted}
         unknownLabel={unknownLabel}
         hovered={hovered}
         onHover={setHovered}

@@ -759,6 +759,14 @@ button:disabled {
   border-color: var(--yellow);
 }
 
+.trial-card .intel {
+  color: var(--yellow);
+}
+
+.oracle .train {
+  margin-top: 12px;
+}
+
 .trial-meta {
   display: grid;
   justify-items: end;

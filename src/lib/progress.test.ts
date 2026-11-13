@@ -83,6 +83,7 @@ describe('objectives', () => {
       ask: false,
       battle: true,
       quest: false,
+      train: false,
       boss: false,
       recruit: false,
     });

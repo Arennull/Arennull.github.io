@@ -1,8 +1,9 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CityStage } from './city/CityStage';
 import { useI18n } from './i18n';
 import { CLUSTER_COLORS, PALETTE, type Tab } from './i18n/strings';
 import { neighbours, neuronById, neurons } from './lib/brain';
+import { sighted } from './lib/intel';
 import type { Cluster } from './lib/types';
 import { Dialogue, Hud, MapInfo, Menu, Toasts, type Line } from './ui/Hud';
 import { NO_FOCUS, Oracle, type CityFocus, type OracleLine } from './ui/Oracle';
@@ -30,6 +31,16 @@ export default function App() {
     const ids = new Set(progress.discovered);
     return new Set(neurons.filter((n) => ids.has(n.node.id)).map((n) => n.index));
   }, [progress.discovered]);
+
+  // The hero knows where he stands, in a game just begun and after any restart.
+  useEffect(() => {
+    if (started && !discovered.has(HOME)) {
+      gain({ type: 'discover', ids: [neurons[HOME]!.node.id] });
+    }
+  }, [started, discovered, gain]);
+
+  // Towers next to a visited one show their name before they are visited.
+  const seen = useMemo(() => sighted(discovered), [discovered]);
 
   const select = useCallback(
     (index: number | null) => {
@@ -63,7 +74,7 @@ export default function App() {
       {items.map((n) => (
         <button type="button" key={n.node.id} onClick={() => select(n.index)}>
           <i style={{ background: CLUSTER_COLORS[n.node.cluster] }} />
-          {discovered.has(n.index) ? n.node.title[lang] : t.map.unknown}
+          {discovered.has(n.index) || seen.has(n.index) ? n.node.title[lang] : t.map.unknown}
         </button>
       ))}
     </div>
@@ -127,11 +138,14 @@ export default function App() {
           hero={hero}
           keys={started && tab === 'map' && !cv}
           discovered={discovered}
+          sighted={seen}
           onSelect={select}
         />
         {started && tab !== 'map' && (
           <div className="panel win">
-            {tab === 'oracle' && <Oracle onFocus={setFocus} onLine={setOracle} />}
+            {tab === 'oracle' && (
+              <Oracle onFocus={setFocus} onLine={setOracle} onTrain={() => openTab('trials')} />
+            )}
             {tab === 'trials' && <Trials onHero={() => openTab('hero')} />}
             {tab === 'quests' && <Quests onLocate={locate} />}
             {tab === 'hero' && <HeroSheet />}
