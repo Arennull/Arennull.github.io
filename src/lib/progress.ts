@@ -113,6 +113,7 @@ export interface Objectives {
   ask: boolean;
   battle: boolean;
   quest: boolean;
+  train: boolean;
   boss: boolean;
   recruit: boolean;
 }
@@ -125,6 +126,7 @@ export function objectivesOf(p: Progress): Objectives {
     ask: p.asked.length > 0,
     battle: p.wins.length > 0,
     quest: p.quests.length > 0,
+    train: Object.values(p.trials).some((score) => score > 0),
     boss: p.wins.includes('boss'),
     recruit: p.recruited,
   };

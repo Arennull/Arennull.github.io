@@ -12,7 +12,7 @@ export interface Project {
   metrics: { value: string; label: L10n }[];
   stack: string[];
   url?: string;
-  /** Neuron to select in the brain when the card asks for it. */
+  /** Tower to select in the city when the card asks for it. */
   neuron?: string;
 }
 

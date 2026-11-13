@@ -46,12 +46,14 @@ export interface StageProps {
   /** Whether the arrow keys move the hero. */
   keys: boolean;
   discovered: ReadonlySet<number>;
+  /** Towers seen from a visited one: named, not yet discovered. */
+  sighted: ReadonlySet<number>;
   query: CityQuery | null;
   onSelect: (index: number | null) => void;
 }
 
 /** Street plan of the same city seen from above, for browsers without WebGL. */
-function City2D({ lit, sources, selected, discovered, onSelect }: StageProps) {
+function City2D({ lit, sources, selected, discovered, sighted, onSelect }: StageProps) {
   const { t, lang } = useI18n();
   const active = new Set([...lit, ...sources]);
   const half = CITY.size / 2;
@@ -75,6 +77,7 @@ function City2D({ lit, sources, selected, discovered, onSelect }: StageProps) {
         {CITY.towers.map((tower, i) => {
           const n = neurons[i]!;
           const known = discovered.has(i) || active.has(i) || selected === i;
+          const named = known || sighted.has(i);
           const size = selected === i ? LOT * 1.25 : LOT;
           const toggle = () => onSelect(selected === i ? null : i);
           return (
@@ -88,7 +91,7 @@ function City2D({ lit, sources, selected, discovered, onSelect }: StageProps) {
               opacity={active.size === 0 || active.has(i) ? 1 : 0.3}
               role="button"
               tabIndex={0}
-              aria-label={known ? n.node.title[lang] : t.map.undiscovered}
+              aria-label={named ? n.node.title[lang] : t.map.undiscovered}
               onClick={toggle}
               onKeyDown={(e) => {
                 if (e.key !== 'Enter' && e.key !== ' ') return;

@@ -13,11 +13,21 @@ import {
   type BattleEvent,
   type BattleState,
 } from '../lib/battle';
+import { embeddedQueries, neurons } from '../lib/brain';
+import { TOWER_COUNT, knowsWeakness } from '../lib/intel';
 import type { BattleId } from '../lib/progress';
+import { projects } from '../../content/projects';
+import { CONTACT } from '../i18n/strings';
 import { useGame } from './progress';
 import { play, startMusic, stopMusic } from './sfx';
 import { ENEMIES, HERO, HERO_ATTACK } from './sprite-data';
 import { Avatar, Sprite } from './sprites';
+
+// A save can outlive the towers, questions or quests it names: count only what still exists.
+const TOWER_IDS = new Set(neurons.map((n) => n.node.id));
+const QUESTION_IDS = new Set(embeddedQueries.map((q) => q.query.id));
+const QUEST_IDS = new Set(projects.map((p) => p.id));
+const count = (ids: string[], known: Set<string>) => ids.filter((id) => known.has(id)).length;
 
 const HERO_SIZE = 64;
 /** How long each step of a turn stays on screen. */
@@ -52,7 +62,7 @@ function describe(event: BattleEvent, id: BattleId, t: Strings): string {
     case 'move': {
       const used = b.uses(b.moves[event.move]);
       if (event.effect === 'weak') return `${used} ${b.weak} ${b.why[event.move]}`;
-      if (event.effect === 'resist') return `${used} ${b.resist}`;
+      if (event.effect === 'resist') return `${used} ${b.resist} ${b.resistWhy[id]}`;
       return event.stale ? `${used} ${b.stale}` : used;
     }
     case 'guard':
@@ -81,7 +91,9 @@ interface Props {
 /** A turn-based fight in the dojo: pick a technique, guard, drink tea or leave. */
 export function Battle({ id, onExit, onHero }: Props) {
   const { t } = useI18n();
-  const { gain } = useGame();
+  const { gain, progress } = useGame();
+  // What the hero learnt in the city before the fight; it does not change during it.
+  const scouted = knowsWeakness(progress, id);
   const [{ state, beats, index }, setFight] = useState(() => startFight(id));
   const [picking, setPicking] = useState(false);
   const [attempt, setAttempt] = useState(0);
@@ -122,7 +134,7 @@ export function Battle({ id, onExit, onHero }: Props) {
     }
     if (state.status === 'won') gain({ type: 'win', id });
     play(state.status === 'won' ? 'win' : 'lose');
-    outcome.current?.querySelector('button')?.focus();
+    outcome.current?.querySelector<HTMLElement>('a, button')?.focus();
   }, [playing, opening, state.status, id, gain]);
 
   // Opening or closing the list of techniques, or starting over, swaps the buttons:
@@ -221,8 +233,14 @@ export function Battle({ id, onExit, onHero }: Props) {
                   key={move}
                   className="btn"
                   disabled={playing}
+                  aria-label={
+                    scouted && move === BATTLES[id].weak
+                      ? `${t.battle.moves[move]} (${t.battle.weakTo(t.battle.moves[move])})`
+                      : undefined
+                  }
                   onClick={() => act({ type: 'move', move })}
                 >
+                  {scouted && move === BATTLES[id].weak && <span aria-hidden>★ </span>}
                   {t.battle.moves[move]}
                 </button>
               ))}
@@ -271,12 +289,37 @@ export function Battle({ id, onExit, onHero }: Props) {
             <span>
               {t.battle.loot}: <b>{t.loot[id]}</b>
             </span>
-            {id === 'boss' && <p>{t.boss.ending}</p>}
+            {id === 'boss' && (
+              <>
+                <p>
+                  <b>{t.ending.title}</b> {t.boss.ending}
+                </p>
+                <p className="num">
+                  {t.ending.stats(
+                    count(progress.discovered, TOWER_IDS),
+                    TOWER_COUNT,
+                    count(progress.asked, QUESTION_IDS),
+                    embeddedQueries.length,
+                    count(progress.quests, QUEST_IDS),
+                    projects.length,
+                  )}
+                </p>
+              </>
+            )}
             <div className="row">
               {id === 'boss' && (
-                <button type="button" className="btn primary" onClick={onHero}>
-                  {t.tabs.hero} ▸
-                </button>
+                <>
+                  <a
+                    className="btn primary"
+                    href={`mailto:${CONTACT.email}`}
+                    onClick={() => gain({ type: 'recruit' })}
+                  >
+                    ✉ {t.sheet.recruit}
+                  </a>
+                  <button type="button" className="btn" onClick={onHero}>
+                    {t.tabs.hero} ▸
+                  </button>
+                </>
               )}
               <button type="button" className="btn" onClick={onExit}>
                 {t.battle.back}

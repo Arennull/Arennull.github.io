@@ -37,6 +37,8 @@ export interface OracleLine {
 interface Props {
   onFocus: (focus: CityFocus) => void;
   onLine: (line: OracleLine | null) => void;
+  /** Opens the training games. */
+  onTrain: () => void;
 }
 
 /** What is being asked: one of the prepared questions, or text typed by the visitor. */
@@ -118,7 +120,7 @@ function LiveEvaluation() {
   );
 }
 
-export function Oracle({ onFocus, onLine }: Props) {
+export function Oracle({ onFocus, onLine, onTrain }: Props) {
   const { t, lang } = useI18n();
   const { gain, progress } = useGame();
   const reducedMotion = useReducedMotion();
@@ -378,6 +380,9 @@ export function Oracle({ onFocus, onLine }: Props) {
       )}
 
       <LiveEvaluation />
+      <button type="button" className="btn small train" onClick={onTrain}>
+        {t.oracle.train} ▸
+      </button>
     </section>
   );
 }

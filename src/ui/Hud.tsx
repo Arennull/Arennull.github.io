@@ -113,6 +113,7 @@ export function MapInfo({
     [done.ask, t.objectives.ask],
     [done.battle, t.objectives.battle],
     [done.quest, t.objectives.quest],
+    [done.train, t.objectives.train],
     [done.boss, t.objectives.boss],
     [done.recruit, t.objectives.recruit],
   ];

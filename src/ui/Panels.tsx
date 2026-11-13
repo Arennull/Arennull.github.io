@@ -8,7 +8,9 @@ import { CloserFarther } from '../games/CloserFarther';
 import { RetrieverGame } from '../games/RetrieverGame';
 import { useI18n } from '../i18n';
 import { CLUSTER_COLORS, CONTACT, PALETTE, STACK } from '../i18n/strings';
+import { BATTLES } from '../lib/battle';
 import { neuronById, neurons } from '../lib/brain';
+import { knowsWeakness } from '../lib/intel';
 import { bossUnlocked, TRIALS, WIN_XP, type BattleId, type TrialId } from '../lib/progress';
 import { CLUSTERS, type Lang } from '../lib/types';
 import { Battle } from './Battle';
@@ -75,6 +77,13 @@ export function Trials({ onHero }: { onHero: () => void }) {
                 <span>
                   <b>{locked ? t.map.unknown : t.enemies[id]}</b>
                   <small>{locked ? t.battle.locked : t.trials.blurbs[id]}</small>
+                  {!locked && (
+                    <small className="intel">
+                      {knowsWeakness(progress, id)
+                        ? `★ ${t.battle.weakTo(t.battle.moves[BATTLES[id].weak])}`
+                        : t.battle.scout}
+                    </small>
+                  )}
                 </span>
                 <span className="trial-meta">
                   {beaten && <span className="tick">✓ {t.battle.beaten}</span>}
