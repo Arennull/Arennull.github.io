@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://arennull.github.io/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arennull.github.io/" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://arennull.github.io/es/" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arennull.github.io/jp/" />
+  </url>
+  <url>
+    <loc>https://arennull.github.io/es/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arennull.github.io/" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://arennull.github.io/es/" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arennull.github.io/jp/" />
+  </url>
+  <url>
+    <loc>https://arennull.github.io/jp/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arennull.github.io/" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://arennull.github.io/es/" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arennull.github.io/jp/" />
+  </url>
+</urlset>

@@ -23,7 +23,6 @@ function byId<T extends { id: string }>(items: T[], id: string, what: string): T
   return found;
 }
 
-export const model = data.model;
 export const dims = data.dims;
 
 export const neurons: Neuron[] = data.nodes.map((n, index) => ({

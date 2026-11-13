@@ -125,7 +125,7 @@ button:disabled {
 .num,
 .mono {
   font-family: var(--mono);
-  font-size: 0.72rem;
+  font-size: 0.8rem;
 }
 
 .muted {
@@ -1124,13 +1124,13 @@ h2 > .num {
 }
 
 .landmark b {
-  font-size: 0.76rem;
+  font-size: 0.8rem;
   line-height: 1.1;
   overflow-wrap: anywhere;
 }
 
 .landmark small {
-  font-size: 0.72rem;
+  font-size: 0.8rem;
   line-height: 1.1;
   color: var(--silver);
 }

@@ -18,6 +18,7 @@ const en = {
     on: 'ON',
     off: 'OFF',
     language: 'Language',
+    menu: 'Menu',
   },
   tabs: {
     map: 'Map',
@@ -61,6 +62,7 @@ const en = {
     quest: 'Open a quest',
     boss: 'Defeat the Hallucination',
     train: 'Try a training game',
+    done: 'done',
     recruit: 'Recruit the hero',
     reset: 'New game',
   },
@@ -310,6 +312,7 @@ const es: Strings = {
     on: 'SÍ',
     off: 'NO',
     language: 'Idioma',
+    menu: 'Menú',
   },
   tabs: { map: 'Mapa', oracle: 'Oráculo', trials: 'Combates', quests: 'Misiones', hero: 'Héroe' },
   hints: {
@@ -347,6 +350,7 @@ const es: Strings = {
     quest: 'Abre una misión',
     boss: 'Derrota a la Alucinación',
     train: 'Prueba un entrenamiento',
+    done: 'hecho',
     recruit: 'Recluta al héroe',
     reset: 'Nueva partida',
   },
@@ -469,7 +473,7 @@ const es: Strings = {
     learned: 'Lección',
     names: {
       retriever: 'Sé el retriever',
-      chunking: 'Chunking lab',
+      chunking: 'Laboratorio de troceado',
       closer: 'Más cerca o más lejos',
     },
     blurbs: {
@@ -578,7 +582,7 @@ const es: Strings = {
 
 const ja: Strings = {
   hero: { name: 'Alejandro Tiscar', role: 'AIエンジニア', guild: 'The AI Business' },
-  meta: { title: 'Alejandro Tiscar — AIエンジニア · RAG・埋め込み・AIの脳' },
+  meta: { title: 'Alejandro Tiscar — AIエンジニア · RAG・埋め込み・AIブレイン' },
   skip: 'CVへスキップ',
   title: {
     tagline: '遊べるポートフォリオ',
@@ -589,6 +593,7 @@ const ja: Strings = {
     on: 'ON',
     off: 'OFF',
     language: 'ことば',
+    menu: 'メニュー',
   },
   tabs: {
     map: 'マップ',
@@ -610,7 +615,7 @@ const ja: Strings = {
   clusters: {
     rag: 'RAG',
     embeddings: '埋め込み',
-    brains: 'AIの脳',
+    brains: 'AIブレイン',
     eval: '評価',
     projects: 'プロジェクト',
     about: 'わたしについて',
@@ -631,6 +636,7 @@ const ja: Strings = {
     quest: 'クエストを ひらく',
     boss: 'ハルシネーションを たおす',
     train: 'しゅぎょうを ためす',
+    done: '完了',
     recruit: 'ゆうしゃを なかまに する',
     reset: 'はじめから',
   },

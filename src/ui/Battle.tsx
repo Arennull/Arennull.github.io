@@ -192,6 +192,9 @@ export function Battle({ id, onExit, onHero }: Props) {
         <div className="plate foe-plate">
           <b>{name}</b>
           <Hp value={hp.enemy} max={BATTLES[id].hp} label={t.battle.hp} />
+          <small className="num" aria-hidden>
+            {hp.enemy}/{BATTLES[id].hp}
+          </small>
         </div>
         <div className="foe">
           <span key={index} className={foeClass}>
