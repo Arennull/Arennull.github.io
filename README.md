@@ -14,6 +14,8 @@ Web personal publicada en <https://arennull.github.io>, planteada como un peque�
 
 ## Cómo funciona
 
+- Sin JavaScript se lee un resumen con proyectos y contacto; hay imagen para compartir, datos estructurados, `robots.txt`, `sitemap.xml` y página 404.
+
 ```
 content/                 textos: fragmentos, preguntas, juegos y proyectos (en/es)
 scripts/build-brain.ts   vectoriza el contenido y escribe src/data/brain.json

@@ -79,7 +79,7 @@ const TABS: Tab[] = ['map', 'oracle', 'trials', 'quests', 'hero'];
 export function Menu({ tab, onTab }: { tab: Tab; onTab: (tab: Tab) => void }) {
   const { t } = useI18n();
   return (
-    <nav className="menu" aria-label="Menu">
+    <nav className="menu" aria-label={t.title.menu}>
       {TABS.map((id) => (
         <button
           type="button"
@@ -125,6 +125,7 @@ export function MapInfo({
         {goals.map(([ok, label]) => (
           <li key={label} className={ok ? 'done' : ''}>
             <span aria-hidden>{ok ? '☑' : '☐'}</span> {label}
+            {ok && <span className="sr-only"> ({t.objectives.done})</span>}
           </li>
         ))}
       </ul>
